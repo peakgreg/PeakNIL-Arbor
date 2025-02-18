@@ -7,6 +7,8 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    env:
+      DEPLOY_PATH: /home/ubuntu/app  # Default path, can be overridden by secrets
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
@@ -22,22 +24,20 @@ jobs:
         env:
           EC2_USER: ${{ secrets.EC2_USER }}
           EC2_HOST: ${{ secrets.EC2_HOST }}
-          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH || '/home/ubuntu/app' }}
         run: |
-          # First test the connection
+          # Debug: Print variables (masking sensitive data)
+          echo "Deploying as user: $EC2_USER"
+          echo "Deploying to path: $DEPLOY_PATH"
+          
+          # Test connection
           ssh -o StrictHostKeyChecking=no -i private_key.pem $EC2_USER@$EC2_HOST "echo 'Connection successful!'"
           
-          # Create deploy directory and set permissions (wrapped in quotes to handle paths with spaces)
-          ssh -i private_key.pem $EC2_USER@$EC2_HOST "sudo mkdir -p \"${DEPLOY_PATH}\" && sudo chown ${EC2_USER}:${EC2_USER} \"${DEPLOY_PATH}\""
+          # Create deploy directory with explicit path
+          ssh -i private_key.pem $EC2_USER@$EC2_HOST "sudo mkdir -p /home/ubuntu/app && sudo chown $EC2_USER:$EC2_USER /home/ubuntu/app"
           
-          # Verify the directory exists and has correct permissions
-          ssh -i private_key.pem $EC2_USER@$EC2_HOST "ls -ld \"${DEPLOY_PATH}\""
-          
-          # Copy files to EC2 (wrapped in quotes to handle paths with spaces)
-          scp -i private_key.pem -r ./* $EC2_USER@$EC2_HOST:"${DEPLOY_PATH}"
-          
-          # Set proper permissions on deployed files
-          ssh -i private_key.pem $EC2_USER@$EC2_HOST "sudo chown -R ${EC2_USER}:${EC2_USER} \"${DEPLOY_PATH}\" && chmod -R 755 \"${DEPLOY_PATH}\""
+          # Copy files to EC2
+          scp -i private_key.pem -r ./* $EC2_USER@$EC2_HOST:/home/ubuntu/app/
           
           echo "Deployment completed successfully!"
 
