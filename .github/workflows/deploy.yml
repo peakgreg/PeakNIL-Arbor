@@ -24,14 +24,20 @@ jobs:
           EC2_HOST: ${{ secrets.EC2_HOST }}
           DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
         run: |
-          # Test connection
+          # First test the connection
           ssh -o StrictHostKeyChecking=no -i private_key.pem $EC2_USER@$EC2_HOST "echo 'Connection successful!'"
           
-          # Create deploy directory if it doesn't exist
-          ssh -i private_key.pem $EC2_USER@$EC2_HOST "mkdir -p $DEPLOY_PATH"
+          # Create deploy directory and set permissions (wrapped in quotes to handle paths with spaces)
+          ssh -i private_key.pem $EC2_USER@$EC2_HOST "sudo mkdir -p \"${DEPLOY_PATH}\" && sudo chown ${EC2_USER}:${EC2_USER} \"${DEPLOY_PATH}\""
           
-          # Copy files to EC2
-          scp -i private_key.pem -r ./* $EC2_USER@$EC2_HOST:$DEPLOY_PATH
+          # Verify the directory exists and has correct permissions
+          ssh -i private_key.pem $EC2_USER@$EC2_HOST "ls -ld \"${DEPLOY_PATH}\""
+          
+          # Copy files to EC2 (wrapped in quotes to handle paths with spaces)
+          scp -i private_key.pem -r ./* $EC2_USER@$EC2_HOST:"${DEPLOY_PATH}"
+          
+          # Set proper permissions on deployed files
+          ssh -i private_key.pem $EC2_USER@$EC2_HOST "sudo chown -R ${EC2_USER}:${EC2_USER} \"${DEPLOY_PATH}\" && chmod -R 755 \"${DEPLOY_PATH}\""
           
           echo "Deployment completed successfully!"
 
