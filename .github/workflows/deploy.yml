@@ -16,7 +16,7 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             if [ -d "/var/www/html/.git" ]; then
-              cd /var/www/html && git pull
+              cd /var/www/html && sudo git pull
             else
-              rm -rf /var/www/html && git clone https://github.com/your-username/your-repo.git /var/www/html
+              sudo rm -rf /var/www/html && sudo git clone https://github.com/your-username/your-repo.git /var/www/html
             fi
