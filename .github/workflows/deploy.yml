@@ -26,20 +26,19 @@ jobs:
           # Test connection
           ssh -o StrictHostKeyChecking=no -i private_key.pem $EC2_USER@$EC2_HOST "echo 'Connection successful!'"
           
-          # First ensure the directory exists and we have proper permissions
+          # Ensure the directory exists and set permissions
           ssh -i private_key.pem $EC2_USER@$EC2_HOST "
             sudo mkdir -p /var/www/html &&
             sudo chown -R $EC2_USER:$EC2_USER /var/www/html
           "
           
-          # Copy ALL files to EC2
-          scp -r -i private_key.pem ./* ./.* $EC2_USER@$EC2_HOST:/var/www/html/ 2>/dev/null || true
+          # Copy ALL files to EC2 (excluding .git and .github)
+          rsync -av --exclude='.git*' --exclude='private_key.pem' -e "ssh -i private_key.pem" ./ $EC2_USER@$EC2_HOST:/var/www/html/
           
-          # Set proper web permissions and verify files
+          # Set proper permissions and verify files
           ssh -i private_key.pem $EC2_USER@$EC2_HOST "
             echo 'Uploaded files:' &&
             ls -la /var/www/html/ &&
-            sudo chown -R www-data:www-data /var/www/html/ &&
             sudo chmod -R 755 /var/www/html/ &&
             sudo find /var/www/html/ -type f -exec chmod 644 {} \;
           "
