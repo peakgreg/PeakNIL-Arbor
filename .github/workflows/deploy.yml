@@ -26,22 +26,22 @@ jobs:
           # Test connection
           ssh -o StrictHostKeyChecking=no -i private_key.pem $EC2_USER@$EC2_HOST "echo 'Connection successful!'"
           
-          # Create deploy directory
-          ssh -i private_key.pem $EC2_USER@$EC2_HOST "sudo mkdir -p /home/ubuntu/app && sudo chown $EC2_USER:$EC2_USER /home/ubuntu/app"
-          
-          # List local files before copying
-          echo "Files to be copied:"
-          ls -la
+          # First ensure the directory exists and we have proper permissions
+          ssh -i private_key.pem $EC2_USER@$EC2_HOST "
+            sudo mkdir -p /var/www/html &&
+            sudo chown -R $EC2_USER:$EC2_USER /var/www/html
+          "
           
           # Copy ALL files to EC2
-          scp -r -i private_key.pem ./* ./.* $EC2_USER@$EC2_HOST:/home/ubuntu/app/ 2>/dev/null || true
+          scp -r -i private_key.pem ./* ./.* $EC2_USER@$EC2_HOST:/var/www/html/ 2>/dev/null || true
           
-          # Set proper permissions and verify files
+          # Set proper web permissions and verify files
           ssh -i private_key.pem $EC2_USER@$EC2_HOST "
             echo 'Uploaded files:' &&
-            ls -la /home/ubuntu/app/ &&
-            sudo chmod -R 755 /home/ubuntu/app/ &&
-            sudo find /home/ubuntu/app/ -type f -exec chmod 644 {} \;
+            ls -la /var/www/html/ &&
+            sudo chown -R www-data:www-data /var/www/html/ &&
+            sudo chmod -R 755 /var/www/html/ &&
+            sudo find /var/www/html/ -type f -exec chmod 644 {} \;
           "
           
           echo "Deployment completed successfully!"
