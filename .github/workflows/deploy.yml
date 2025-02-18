@@ -15,5 +15,8 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            cd /var/www/html
-            git pull
+            if [ -d "/var/www/html/.git" ]; then
+              cd /var/www/html && git pull
+            else
+              rm -rf /var/www/html && git clone https://github.com/your-username/your-repo.git /var/www/html
+            fi
