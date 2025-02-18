@@ -7,8 +7,6 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    env:
-      DEPLOY_PATH: /home/ubuntu/app  # Default path, can be overridden by secrets
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
@@ -24,20 +22,27 @@ jobs:
         env:
           EC2_USER: ${{ secrets.EC2_USER }}
           EC2_HOST: ${{ secrets.EC2_HOST }}
-          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH || '/home/ubuntu/app' }}
         run: |
-          # Debug: Print variables (masking sensitive data)
-          echo "Deploying as user: $EC2_USER"
-          echo "Deploying to path: $DEPLOY_PATH"
-          
           # Test connection
           ssh -o StrictHostKeyChecking=no -i private_key.pem $EC2_USER@$EC2_HOST "echo 'Connection successful!'"
           
-          # Create deploy directory with explicit path
+          # Create deploy directory
           ssh -i private_key.pem $EC2_USER@$EC2_HOST "sudo mkdir -p /home/ubuntu/app && sudo chown $EC2_USER:$EC2_USER /home/ubuntu/app"
           
-          # Copy files to EC2
-          scp -i private_key.pem -r ./* $EC2_USER@$EC2_HOST:/home/ubuntu/app/
+          # List local files before copying
+          echo "Files to be copied:"
+          ls -la
+          
+          # Copy ALL files to EC2
+          scp -r -i private_key.pem ./* ./.* $EC2_USER@$EC2_HOST:/home/ubuntu/app/ 2>/dev/null || true
+          
+          # Set proper permissions and verify files
+          ssh -i private_key.pem $EC2_USER@$EC2_HOST "
+            echo 'Uploaded files:' &&
+            ls -la /home/ubuntu/app/ &&
+            sudo chmod -R 755 /home/ubuntu/app/ &&
+            sudo find /home/ubuntu/app/ -type f -exec chmod 644 {} \;
+          "
           
           echo "Deployment completed successfully!"
 
