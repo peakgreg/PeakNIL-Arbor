@@ -28,7 +28,6 @@ jobs:
           # Create necessary directories and set initial permissions
           ssh -i private_key.pem $EC2_USER@$EC2_HOST "
             sudo mkdir -p /var/www/html &&
-            sudo mkdir -p /var/www/app &&
             sudo chown -R $EC2_USER:$EC2_USER /var/www
           "
           
@@ -36,7 +35,7 @@ jobs:
           rsync -av --exclude='.git*' --exclude='private_key.pem' -e "ssh -i private_key.pem" ./public/ $EC2_USER@$EC2_HOST:/var/www/html/
           
           # Copy everything else (excluding public directory and other unnecessary files)
-          rsync -av --exclude='.git*' --exclude='private_key.pem' --exclude='public' -e "ssh -i private_key.pem" ./ $EC2_USER@$EC2_HOST:/var/www/app/
+          rsync -av --exclude='.git*' --exclude='private_key.pem' --exclude='public' -e "ssh -i private_key.pem" ./ $EC2_USER@$EC2_HOST:/var/www/
           
           # Set proper permissions
           ssh -i private_key.pem $EC2_USER@$EC2_HOST "
@@ -45,14 +44,16 @@ jobs:
             sudo find /var/www/html/ -type f -exec chmod 644 {} \; &&
             
             # Set private directory permissions (not accessible via web)
-            sudo chmod -R 750 /var/www/app/ &&
-            sudo find /var/www/app/ -type f -exec chmod 640 {} \; &&
+            sudo chmod -R 750 /var/www/ &&
+            sudo find /var/www/ -type f -exec chmod 640 {} \; &&
+            sudo chmod -R 755 /var/www/html/ &&
+            sudo find /var/www/html/ -type f -exec chmod 644 {} \; &&
             
             # Verify deployments
             echo 'Public files (html):' &&
             ls -la /var/www/html/ &&
-            echo 'Private files (app):' &&
-            ls -la /var/www/app/
+            echo 'Private files (www):' &&
+            ls -la /var/www/
           "
           
           echo "Deployment completed successfully!"
