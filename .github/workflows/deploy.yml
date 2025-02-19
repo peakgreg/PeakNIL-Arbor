@@ -3,7 +3,6 @@ on:
   push:
     branches:
       - main
-
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -26,21 +25,34 @@ jobs:
           # Test connection
           ssh -o StrictHostKeyChecking=no -i private_key.pem $EC2_USER@$EC2_HOST "echo 'Connection successful!'"
           
-          # Ensure the directory exists and set permissions
+          # Create necessary directories and set initial permissions
           ssh -i private_key.pem $EC2_USER@$EC2_HOST "
             sudo mkdir -p /var/www/html &&
-            sudo chown -R $EC2_USER:$EC2_USER /var/www/html
+            sudo mkdir -p /var/www/app &&
+            sudo chown -R $EC2_USER:$EC2_USER /var/www
           "
           
-          # Copy ALL files to EC2 (excluding .git and .github)
-          rsync -av --exclude='.git*' --exclude='private_key.pem' -e "ssh -i private_key.pem" ./ $EC2_USER@$EC2_HOST:/var/www/html/
+          # Copy public files to /var/www/html
+          rsync -av --exclude='.git*' --exclude='private_key.pem' -e "ssh -i private_key.pem" ./public/ $EC2_USER@$EC2_HOST:/var/www/html/
           
-          # Set proper permissions and verify files
+          # Copy everything else (excluding public directory and other unnecessary files)
+          rsync -av --exclude='.git*' --exclude='private_key.pem' --exclude='public' -e "ssh -i private_key.pem" ./ $EC2_USER@$EC2_HOST:/var/www/app/
+          
+          # Set proper permissions
           ssh -i private_key.pem $EC2_USER@$EC2_HOST "
-            echo 'Uploaded files:' &&
-            ls -la /var/www/html/ &&
+            # Set public directory permissions (readable by web server)
             sudo chmod -R 755 /var/www/html/ &&
-            sudo find /var/www/html/ -type f -exec chmod 644 {} \;
+            sudo find /var/www/html/ -type f -exec chmod 644 {} \; &&
+            
+            # Set private directory permissions (not accessible via web)
+            sudo chmod -R 750 /var/www/app/ &&
+            sudo find /var/www/app/ -type f -exec chmod 640 {} \; &&
+            
+            # Verify deployments
+            echo 'Public files (html):' &&
+            ls -la /var/www/html/ &&
+            echo 'Private files (app):' &&
+            ls -la /var/www/app/
           "
           
           echo "Deployment completed successfully!"
