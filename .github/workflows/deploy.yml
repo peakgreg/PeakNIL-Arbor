@@ -1,4 +1,3 @@
-#
 name: EC2 Deployment
 on:
   push:
@@ -26,35 +25,25 @@ jobs:
           # Test connection
           ssh -o StrictHostKeyChecking=no -i private_key.pem $EC2_USER@$EC2_HOST "echo 'Connection successful!'"
           
-          # Create necessary directories and set initial permissions
+          # Create directories if they don't exist
           ssh -i private_key.pem $EC2_USER@$EC2_HOST "
-            sudo mkdir -p /var/www/html &&
-            sudo chown -R $EC2_USER:$EC2_USER /var/www
+            sudo mkdir -p /var/www/html
           "
           
-          # Copy public files to /var/www/html
+          # Copy files to their respective locations
           rsync -av --exclude='.git*' --exclude='private_key.pem' -e "ssh -i private_key.pem" ./public/ $EC2_USER@$EC2_HOST:/var/www/html/
-          
-          # Copy everything else (excluding public directory and other unnecessary files)
           rsync -av --exclude='.git*' --exclude='private_key.pem' --exclude='public' -e "ssh -i private_key.pem" ./ $EC2_USER@$EC2_HOST:/var/www/
           
-          # Set proper permissions
+          # Set correct permissions
           ssh -i private_key.pem $EC2_USER@$EC2_HOST "
-            # Set public directory permissions (readable by web server)
-            sudo chmod -R 755 /var/www/html/ &&
-            sudo find /var/www/html/ -type f -exec chmod 644 {} \; &&
+            # First set private /var/www permissions
+            sudo chown -R $EC2_USER:$EC2_USER /var/www &&
+            sudo chmod 750 /var/www &&
             
-            # Set private directory permissions (not accessible via web)
-            sudo chmod -R 750 /var/www/ &&
-            sudo find /var/www/ -type f -exec chmod 640 {} \; &&
-            sudo chmod -R 755 /var/www/html/ &&
-            sudo find /var/www/html/ -type f -exec chmod 644 {} \; &&
-            
-            # Verify deployments
-            echo 'Public files (html):' &&
-            ls -la /var/www/html/ &&
-            echo 'Private files (www):' &&
-            ls -la /var/www/
+            # Then set public /var/www/html permissions
+            sudo chown -R www-data:www-data /var/www/html &&
+            sudo chmod -R 755 /var/www/html &&
+            sudo find /var/www/html -type f -exec chmod 644 {} \;
           "
           
           echo "Deployment completed successfully!"
