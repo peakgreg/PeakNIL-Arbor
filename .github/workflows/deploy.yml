@@ -1,3 +1,4 @@
+#
 name: EC2 Deployment
 on:
   push:
@@ -25,28 +26,41 @@ jobs:
           # Test connection
           ssh -o StrictHostKeyChecking=no -i private_key.pem $EC2_USER@$EC2_HOST "echo 'Connection successful!'"
           
-          # Create directories if they don't exist
+          # Create necessary directories and set initial permissions
           ssh -i private_key.pem $EC2_USER@$EC2_HOST "
-            sudo mkdir -p /var/www/html
+            sudo mkdir -p /var/www/html &&
+            sudo chown -R $EC2_USER:$EC2_USER /var/www
           "
           
-          # Copy files to their respective locations
+          # Copy public files to /var/www/html
           rsync -av --exclude='.git*' --exclude='private_key.pem' -e "ssh -i private_key.pem" ./public/ $EC2_USER@$EC2_HOST:/var/www/html/
+          
+          # Copy everything else (excluding public directory and other unnecessary files)
           rsync -av --exclude='.git*' --exclude='private_key.pem' --exclude='public' -e "ssh -i private_key.pem" ./ $EC2_USER@$EC2_HOST:/var/www/
           
-          # Set correct permissions
+          # Set proper permissions
           ssh -i private_key.pem $EC2_USER@$EC2_HOST "
-            # First set private /var/www permissions
-            sudo chown -R $EC2_USER:$EC2_USER /var/www &&
-            sudo chmod 750 /var/www &&
+            # Set public directory permissions (readable by web server)
+            sudo chmod -R 755 /var/www/html/ &&
+            sudo find /var/www/html/ -type f -exec chmod 644 {} \; &&
             
-            # Then set public /var/www/html permissions
-            sudo chown -R apache:apache /var/www/html &&
-            sudo chmod -R 755 /var/www/html &&
-            sudo find /var/www/html -type f -exec chmod 644 {} \;
+            # Set private directory permissions (not accessible via web)
+            sudo chmod -R 750 /var/www/ &&
+            sudo find /var/www/ -type f -exec chmod 640 {} \; &&
+            sudo chmod -R 755 /var/www/html/ &&
+            sudo find /var/www/html/ -type f -exec chmod 644 {} \; &&
+            
+            # Verify deployments
+            echo 'Public files (html):' &&
+            ls -la /var/www/html/ &&
+            echo 'Private files (www):' &&
+            ls -la /var/www/
           "
           
           echo "Deployment completed successfully!"
 
       - name: Cleanup
         if: always()
+        run: |
+          rm -f private_key.pem
+          echo "Cleanup completed"
