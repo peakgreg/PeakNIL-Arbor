@@ -1,4 +1,5 @@
 <?php
+#
 require_once __DIR__ . '/../config/init.php';
 require_once MODULES_PATH . '/common/functions/email_functions.php';
 
