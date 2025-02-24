@@ -1,0 +1,46 @@
+# General Information
+
+  - We are testing at http://localhost:8888
+
+# Memory and Confidence Checks
+
+  - If you understand my prompt fully, respond with 'I understand completely.' without tools every time you are about to use a tool.
+  - Do not be afraid to ask clarifying questions if you do not fully understand a prompt.
+  - Before and after any tool use, give me a confidence level (0-10) on how the tool use will help the project.
+
+# Code Quality
+
+  - DO NOT BE LAZY. DO NOT OMIT CODE.
+  - You pledge to follow the custom instructions.
+  - Use procederal PHP.
+  - Use MySQLi queries.
+
+# Code Organization
+
+  - Don't forget to update codebase documentation with changes.
+
+# Analysis and Planning
+
+  - Before writing code:
+    1. Analyze all code files thoroughly.
+    2. Get full context.
+    3. Write .MD implementation plan.
+    4. Then implement code.
+
+  - Start analyzing full flow thoroughly, always state a confidence score 1 to 10.
+  - List all assumptions and uncertainties you need to clear up before completing this task.
+  - Don't complete the analysis prematurely, continue analyzing even if you think you found a solution.
+  - Rate confidence (1-10) before saving files, after saving, after rejections, and before task completion.
+
+# Best Practices
+
+  - Check project files before suggesting structural or dependency changes.
+  - Ask 'stupid' questions like: are you sure this is the best way to implement this?
+
+# Security
+
+## Sensitive Files
+
+DO NOT read or modify:
+
+-   .env files

@@ -1,0 +1,124 @@
+.card-text-overlay-1 {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  margin: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  background-color: rgba(0, 0, 0, 0.6);
+  color: #fff;
+  border-radius: 0.25rem;
+}
+
+.athlete-info-1 {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 10px;
+  margin: 8px;
+  /* From https://css.glass */
+  background: rgba(255, 255, 255, 0.4);
+  border-radius: 18px;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+@media (max-width: 767px) {
+  .athlete-info-1 {
+    padding: 8px;
+  }
+}
+
+.athlete-link-1 {
+  cursor: pointer;
+}
+
+.athlete-name-1 {
+  color: #000;
+  font-weight: 600;
+  font-size: 1.1rem;
+  text-shadow: 0px 1px 0px rgba(255, 255, 255, 0.2);
+}
+
+@media (max-width: 767px) {
+  .athlete-name-1 {
+    font-size: 0.85rem;
+    /* Height for mobile devices */
+  }
+}
+
+.athlete-image-1 {
+  position: absolute;
+  bottom: 14px;
+  right: 18px;
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+  z-index: 1000;
+}
+
+@media (max-width: 767px) {
+  .athlete-image-1 {
+    position: absolute;
+    bottom: 14px;
+    right: 18px;
+    width: 24px;
+    height: 24px;
+    object-fit: cover;
+    z-index: 1000;
+    /* Height for mobile devices */
+  }
+}
+
+.athlete-school-1 {
+  color: #000;
+  font-weight: 500;
+  font-size: 0.rem;
+}
+
+@media (max-width: 767px) {
+  .athlete-school-1 {
+    font-weight: 500;
+    font-size: 0.7rem;
+    /* Height for mobile devices */
+  }
+}
+
+.athlete-verified-1 {
+  height: 16px;
+  width: 16px;
+}
+
+@media (max-width: 767px) {
+  .athlete-verified-1 {
+    height: 12px;
+    width: 12px;
+  }
+}
+
+.athlete-social-1 {
+  color: #000;
+  border-radius: 18px;
+  text-align: left;
+  font-size: 1.2rem;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  /* Adjust the gap between items as needed */
+}
+
+.social-item {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  /* Adjust the gap between icon and text as needed */
+}
+
+@media (max-width: 767px) {
+  .athlete-social-1 {
+    font-size: 1rem;
+  }
+}

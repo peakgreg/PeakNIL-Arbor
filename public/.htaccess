@@ -1,0 +1,22 @@
+# public/.htaccess
+RewriteEngine On
+RewriteBase /
+
+# Allow direct access to actual files and directories
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+
+# Forward everything else to index.php
+RewriteRule ^(.*)$ index.php [QSA,L]
+
+# Protect config files
+<FilesMatch "^\.">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# Disable directory browsing
+Options -Indexes
+
+# Protect against script injections
+Options +FollowSymLinks -Multiviews

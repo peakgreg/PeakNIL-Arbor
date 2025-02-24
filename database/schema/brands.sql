@@ -1,0 +1,55 @@
+/*
+ * Brands Table
+ * -----------
+ * Stores information about brands/companies.
+ * Manages brand profiles, social media, and business details.
+ */
+
+CREATE TABLE `brands` (
+  `id` int unsigned NOT NULL AUTO_INCREMENT,
+  `username` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'Username of the brand.',
+  `uniqueID` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'Unique id generated for each brand. This will always start with with "B_".',
+  `active` varchar(3) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT 'yes' COMMENT 'Is this brand currently active? ''yes'' if YES. ''no'' if NO.',
+  `available_balance` int DEFAULT '0' COMMENT 'Available balance for NIL deals. Example ''10000'' equals ''100.00''.',
+  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'Name to be displayed for the brand.',
+  `legal_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'Full legal name of the brand.',
+  `tags` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci COMMENT 'Hash tags the brand has selected to describe itself.',
+  `url_website` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'URL to the website of the brand.',
+  `facebook_username` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'Brands Facebook username.',
+  `twitter_username` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'Brands Twitter/X username.',
+  `instagram_username` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'Brands Instagram username.',
+  `tiktok_username` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'Brands TikTok username.',
+  `phone` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'Phone number for the brand.',
+  `banned` int DEFAULT '0' COMMENT 'Is the brand banned? ''1'' if YES, ''0'' if NO.',
+  `accept_pitches` varchar(3) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'Does this brand allow athletes to send them pitches for NIL deals? ''yes'' if YES. ''no'' if NO.',
+  `verified` varchar(3) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT 'no' COMMENT 'Has the brand been verified? ''yes'' if YES. ''no'' if NO.',
+  `logo_url` tinytext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci COMMENT 'URL of the brands logo.',
+  `created_by` int DEFAULT NULL COMMENT '''id'' of the user that created the brand.',
+  `created_on` int DEFAULT NULL COMMENT 'Timestamp that the user created the account.',
+  `coverImageURL` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'URL of the cover image for the brands profile.',
+  `profileImageURL` tinytext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci COMMENT 'URL of the profile image for the brand.',
+  `profile` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci COMMENT 'Profile information about the brand.',
+  `display_website` varchar(3) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'Display the website of the company on the brand profile? ''NULL'' or ''yes'' if YES. ''no'' if NO.',
+  `display_facebook` varchar(3) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'Display the Facebook of the company on the brand profile? ''NULL'' or ''yes'' if YES. ''no'' if NO.',
+  `display_twitter` varchar(3) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'Display the Twitter/X of the company on the brand profile? ''NULL'' or ''yes'' if YES. ''no'' if NO.',
+  `display_instagram` varchar(3) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'Display the Instagram of the company on the brand profile? ''NULL'' or ''yes'' if YES. ''no'' if NO.',
+  `display_tiktok` varchar(3) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'Display the TikTok of the company on the brand profile? ''NULL'' or ''yes'' if YES. ''no'' if NO.',
+  `address` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'Address of the brand.',
+  `address_2` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'Second line of the address of the brand if applicable.',
+  `city` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'Address city of the brand.',
+  `state` varchar(2) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'Address state of the brand.',
+  `zipcode` varchar(12) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'Address zipcode of the brand.',
+  `display_address` int DEFAULT '1' COMMENT 'Display the address of the brand on their profile page? ''1'' if YES. ''0'' if NO.',
+  `imported` varchar(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'Has the brand been imported manually? ''1'' if YES. ''NULL'' if NO.',
+  `claimed` varchar(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'Has the brand been claimed? ''1'' if YES. ''NULL'' if NO.',
+  `email` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'Email address of the brand.',
+  `allow_messages` int DEFAULT '1' COMMENT 'Does the brand allow messages to be sent to them? ''1'' if YES. ''0'' if NO.',
+  `allow_pitches` int DEFAULT '1' COMMENT 'Does the brand allow NIL pitches to be sent to them? ''1'' if YES. ''0'' if NO.',
+  `display_profile` int DEFAULT '1' COMMENT 'Does the brand want to display their profile on PeakNIL? ''1'' if YES. ''0'' if NO.',
+  `brand_type` enum('local','nationwide','both') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'Is the brand a ''local'' brand, ''nationwide'' brand, or ''both''.',
+  `delete` int DEFAULT '0' COMMENT 'Has the brand requested to be deleted? ''0'' if NO. ''1'' if YES.',
+  `delete_request_id` int DEFAULT NULL COMMENT 'ID of the user that requested deletion. References ''users(id)''.',
+  `delete_request_timestamp` int DEFAULT NULL COMMENT 'Timestamp of the deletion request.',
+  `fee_percent` decimal(5,3) DEFAULT '0.200' COMMENT 'Custom fee percentage for this brand.',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

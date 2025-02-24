@@ -1,0 +1,20 @@
+CREATE TABLE `email_log` (
+    `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `to_address` VARCHAR(255) NOT NULL,
+    `from_address` VARCHAR(255) NOT NULL,
+    `from_name` VARCHAR(255),
+    `subject` VARCHAR(255) NOT NULL,
+    `title` VARCHAR(255) NOT NULL,
+    `body` TEXT NOT NULL,
+    `is_html` TINYINT(1) NOT NULL DEFAULT 0,
+    `attachments` TEXT,
+    `status` ENUM('success', 'failed') NOT NULL,
+    `error_message` TEXT,
+    `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `sent_at` TIMESTAMP NULL DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    INDEX `idx_status` (`status`),
+    INDEX `idx_created_at` (`created_at`),
+    INDEX `idx_sent_at` (`sent_at`),
+    INDEX `idx_to_address` (`to_address`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
