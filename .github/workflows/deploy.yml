@@ -110,9 +110,30 @@ jobs:
             -e "ssh -i private_key.pem" \
             ./ $EC2_USER@$EC2_HOST:/var/www/
           
-          # Run Composer install
-          echo "Installing Composer dependencies..."
+          # Check for Composer and install if needed, then run Composer install
+          echo "Checking for Composer and installing dependencies..."
           ssh -i private_key.pem $EC2_USER@$EC2_HOST "
+            # Check if Composer is installed
+            if ! command -v composer &> /dev/null; then
+              echo 'Composer not found, installing...'
+              # Create directory for Composer
+              mkdir -p ~/.composer
+              
+              # Download Composer installer
+              curl -sS https://getcomposer.org/installer -o composer-setup.php
+              
+              # Install Composer globally
+              sudo php composer-setup.php --install-dir=/usr/local/bin --filename=composer
+              
+              # Clean up installer
+              rm composer-setup.php
+              
+              echo 'Composer installed successfully!'
+            else
+              echo 'Composer is already installed'
+            fi
+            
+            # Install dependencies
             cd /var/www &&
             composer install \
               --no-dev \
