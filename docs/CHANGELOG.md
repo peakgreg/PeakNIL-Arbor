@@ -5,6 +5,12 @@
 ### Added
 - Added GitHub Actions workflow to test EC2 connection on push to main branch.
 
+## [2025-02-24]
+- Updated config/db.php to use SSL/TLS connection for PlanetScale with enhanced configuration
+    - Modified mysqli connection to include MYSQLI_OPT_SSL_VERIFY_SERVER_CERT, ssl_set, and MYSQLI_CLIENT_SSL
+    - Ensured secure database connection to PlanetScale
+    - Maintained existing error handling and charset settings
+
 ## [2025-02-03]
 - Updated NIL services filter UI to dropdown style
     - Converted horizontal filters to dropdown-based layout
