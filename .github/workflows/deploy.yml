@@ -22,20 +22,35 @@ jobs:
         run: |
           # Test connection
           ssh -o StrictHostKeyChecking=no -i private_key.pem $EC2_USER@$EC2_HOST "echo 'Connection successful!'"
-          # Ensure the directory exists and set permissions
+          
+          # Ensure both directories exist and set permissions
           ssh -i private_key.pem $EC2_USER@$EC2_HOST "
             sudo mkdir -p /var/www/html &&
-            sudo chown -R $EC2_USER:$EC2_USER /var/www/html
+            sudo mkdir -p /var/www &&
+            sudo chown -R $EC2_USER:$EC2_USER /var/www/html &&
+            sudo chown -R $EC2_USER:$EC2_USER /var/www
           "
-          # Copy ALL files to EC2 (excluding .git and .github)
-          rsync -av --exclude='.git*' --exclude='private_key.pem' -e "ssh -i private_key.pem" ./ $EC2_USER@$EC2_HOST:/var/www/html/
+          
+          # Copy public directory contents to /var/www/html
+          echo "Uploading /public contents to /var/www/html..."
+          rsync -av --exclude='.git*' --exclude='private_key.pem' -e "ssh -i private_key.pem" ./public/ $EC2_USER@$EC2_HOST:/var/www/html/
+          
+          # Copy everything else (excluding public directory) to /var/www
+          echo "Uploading non-public files to /var/www..."
+          rsync -av --exclude='.git*' --exclude='private_key.pem' --exclude='public' --exclude='.github' -e "ssh -i private_key.pem" ./ $EC2_USER@$EC2_HOST:/var/www/
+          
           # Set proper permissions and verify files
           ssh -i private_key.pem $EC2_USER@$EC2_HOST "
-            echo 'Uploaded files:' &&
+            echo 'Uploaded files to /var/www/html:' &&
             ls -la /var/www/html/ &&
+            echo 'Uploaded files to /var/www:' &&
+            ls -la /var/www/ &&
             sudo chmod -R 755 /var/www/html/ &&
-            sudo find /var/www/html/ -type f -exec chmod 644 {} \;
+            sudo chmod -R 755 /var/www/ &&
+            sudo find /var/www/html/ -type f -exec chmod 644 {} \; &&
+            sudo find /var/www/ -type f -exec chmod 644 {} \;
           "
+          
           # Clear PHP caches and restart services
           ssh -i private_key.pem $EC2_USER@$EC2_HOST "
             echo 'Clearing PHP caches and restarting services...' &&
@@ -60,9 +75,11 @@ jobs:
             sudo systemctl restart apache2 2>/dev/null || sudo service apache2 restart 2>/dev/null || echo 'Apache restart attempted' &&
             # Clear PHP file cache by touching files if needed
             find /var/www/html -name '*.php' -exec touch {} \; &&
+            find /var/www -name '*.php' -exec touch {} \; &&
             echo 'PHP files touched to refresh file cache' &&
             echo 'PHP cache clearing and service restarts completed!'
           "
+          
           echo "Deployment completed successfully!"
       - name: Cleanup
         if: always()
