@@ -36,9 +36,9 @@ jobs:
             sudo chmod -R 755 /var/www/html/ &&
             sudo find /var/www/html/ -type f -exec chmod 644 {} \;
           "
-          # Clear PHP caches
+          # Clear PHP caches and restart services
           ssh -i private_key.pem $EC2_USER@$EC2_HOST "
-            echo 'Clearing PHP caches...' &&
+            echo 'Clearing PHP caches and restarting services...' &&
             # Clear OPcache if enabled
             if php -r 'echo (int)function_exists(\"opcache_reset\");'; then
               php -r 'opcache_reset();'
@@ -49,17 +49,19 @@ jobs:
               php -r 'apcu_clear_cache();'
               echo 'APCu cache cleared successfully!'
             fi &&
-            # Restart PHP-FPM service if it exists
-            if sudo systemctl status php*-fpm > /dev/null 2>&1; then
-              sudo systemctl restart php*-fpm
-              echo 'PHP-FPM service restarted!'
-            fi &&
-            # Restart Apache if it exists
-            if sudo systemctl status apache2 > /dev/null 2>&1; then
-              sudo systemctl restart apache2
-              echo 'Apache service restarted!'
-            fi &&
-            echo 'PHP cache clearing completed!'
+            # Force restart PHP services regardless of current status
+            echo 'Restarting PHP services...' &&
+            # Try PHP-FPM restart (common in modern setups)
+            sudo systemctl restart php*-fpm 2>/dev/null || echo 'No PHP-FPM service found' &&
+            # Try PHP service restart (for systems using traditional PHP module)
+            sudo service php* restart 2>/dev/null || echo 'No PHP service found' &&
+            # Force restart Apache regardless of current status
+            echo 'Restarting Apache...' &&
+            sudo systemctl restart apache2 2>/dev/null || sudo service apache2 restart 2>/dev/null || echo 'Apache restart attempted' &&
+            # Clear PHP file cache by touching files if needed
+            find /var/www/html -name '*.php' -exec touch {} \; &&
+            echo 'PHP files touched to refresh file cache' &&
+            echo 'PHP cache clearing and service restarts completed!'
           "
           echo "Deployment completed successfully!"
       - name: Cleanup
