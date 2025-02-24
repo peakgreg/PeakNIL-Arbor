@@ -3,21 +3,18 @@ on:
   push:
     branches:
       - main
-
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
-
       - name: Create SSH key
         env:
           EC2_PRIVATE_KEY: ${{ secrets.EC2_PRIVATE_KEY }}
         run: |
           echo "$EC2_PRIVATE_KEY" > private_key.pem
           chmod 600 private_key.pem
-
       - name: Deploy to EC2
         env:
           EC2_USER: ${{ secrets.EC2_USER }}
@@ -25,16 +22,13 @@ jobs:
         run: |
           # Test connection
           ssh -o StrictHostKeyChecking=no -i private_key.pem $EC2_USER@$EC2_HOST "echo 'Connection successful!'"
-          
           # Ensure the directory exists and set permissions
           ssh -i private_key.pem $EC2_USER@$EC2_HOST "
             sudo mkdir -p /var/www/html &&
             sudo chown -R $EC2_USER:$EC2_USER /var/www/html
           "
-          
           # Copy ALL files to EC2 (excluding .git and .github)
           rsync -av --exclude='.git*' --exclude='private_key.pem' -e "ssh -i private_key.pem" ./ $EC2_USER@$EC2_HOST:/var/www/html/
-          
           # Set proper permissions and verify files
           ssh -i private_key.pem $EC2_USER@$EC2_HOST "
             echo 'Uploaded files:' &&
@@ -42,9 +36,32 @@ jobs:
             sudo chmod -R 755 /var/www/html/ &&
             sudo find /var/www/html/ -type f -exec chmod 644 {} \;
           "
-          
+          # Clear PHP caches
+          ssh -i private_key.pem $EC2_USER@$EC2_HOST "
+            echo 'Clearing PHP caches...' &&
+            # Clear OPcache if enabled
+            if php -r 'echo (int)function_exists(\"opcache_reset\");'; then
+              php -r 'opcache_reset();'
+              echo 'OPcache cleared successfully!'
+            fi &&
+            # Clear APCu cache if installed
+            if php -r 'echo (int)function_exists(\"apcu_clear_cache\");'; then
+              php -r 'apcu_clear_cache();'
+              echo 'APCu cache cleared successfully!'
+            fi &&
+            # Restart PHP-FPM service if it exists
+            if sudo systemctl status php*-fpm > /dev/null 2>&1; then
+              sudo systemctl restart php*-fpm
+              echo 'PHP-FPM service restarted!'
+            fi &&
+            # Restart Apache if it exists
+            if sudo systemctl status apache2 > /dev/null 2>&1; then
+              sudo systemctl restart apache2
+              echo 'Apache service restarted!'
+            fi &&
+            echo 'PHP cache clearing completed!'
+          "
           echo "Deployment completed successfully!"
-
       - name: Cleanup
         if: always()
         run: |
