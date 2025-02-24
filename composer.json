@@ -1,0 +1,24 @@
+{
+    "name": "peaknil/refactor",
+    "description": "PeakNIL Platform",
+    "type": "project",
+    "require": {
+        "php": ">=8.0",
+        "vlucas/phpdotenv": "^5.3"
+    },
+    "autoload": {
+        "psr-4": {
+            "API\\Core\\": "modules/api/Core/",
+            "API\\V1\\": "modules/api/V1/",
+            "API\\Middleware\\": "modules/api/Middleware/",
+            "API\\": "modules/api/"
+        }
+    },
+    "config": {
+        "optimize-autoloader": true,
+        "preferred-install": "dist",
+        "sort-packages": true
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}

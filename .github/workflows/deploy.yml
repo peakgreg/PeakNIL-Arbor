@@ -1,3 +1,55 @@
+# EC2 Deployment Workflow
+#
+# Overview:
+# This workflow automates deployment of a web application to an Amazon EC2 instance,
+# separating public content from application code for improved security.
+#
+# Trigger: Push to main branch
+# Environment: Ubuntu Latest
+#
+# Detailed Process:
+# 1. Repository Checkout
+#    - Fetches repository code using actions/checkout@v2
+#
+# 2. SSH Key Creation
+#    - Creates private key file from EC2_PRIVATE_KEY secret
+#    - Sets 600 permissions for SSH usage
+#
+# 3. Connection Testing
+#    - Verifies connectivity to EC2 instance
+#
+# 4. Directory Preparation
+#    - Creates and sets ownership for:
+#      - /var/www/html (public web root)
+#      - /var/www (protected application code)
+#
+# 5. File Deployment - Split Structure
+#    - Public Content: Copies /public directory to /var/www/html/
+#    - Application Code: Copies other files to /var/www/
+#    - Excludes .git and .github directories
+#
+# 6. Permission Management
+#    - Sets 755 for directories (rwxr-xr-x)
+#    - Sets 644 for files (rw-r--r--)
+#
+# 7. PHP Cache Clearing
+#    - Clears OPcache and APCu if available
+#
+# 8. Service Restart
+#    - Restarts PHP services (PHP-FPM or PHP)
+#    - Restarts Apache web server
+#
+# 9. File Cache Refresh
+#    - Touches all PHP files to refresh file-based caches
+#
+# 10. Cleanup
+#    - Removes temporary private key file
+#
+# Required Secrets:
+# - EC2_PRIVATE_KEY: SSH private key for EC2 access
+# - EC2_USER: Username for EC2 connection
+# - EC2_HOST: Hostname or IP address of EC2 instance
+#
 name: EC2 Deployment
 on:
   push:
