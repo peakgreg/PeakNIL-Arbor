@@ -26,7 +26,12 @@
 # 5. File Deployment - Split Structure
 #    - Public Content: Copies /public directory to /var/www/html/
 #    - Application Code: Copies other files to /var/www/
-#    - Excludes .git and .github directories
+#    - Excluded Files/Directories:
+#      - .git* files and directories
+#      - .github directory
+#      - /database directory
+#      - .clinerules
+#      - .gitattributes and .gitignore
 #
 # 6. Permission Management
 #    - Sets 755 for directories (rwxr-xr-x)
@@ -89,7 +94,17 @@ jobs:
           
           # Copy everything else (excluding public directory) to /var/www
           echo "Uploading non-public files to /var/www..."
-          rsync -av --exclude='.git*' --exclude='private_key.pem' --exclude='public' --exclude='.github' -e "ssh -i private_key.pem" ./ $EC2_USER@$EC2_HOST:/var/www/
+          rsync -av \
+            --exclude='.git*' \
+            --exclude='.gitattributes' \
+            --exclude='.gitignore' \
+            --exclude='private_key.pem' \
+            --exclude='public' \
+            --exclude='.github' \
+            --exclude='database' \
+            --exclude='.clinerules' \
+            -e "ssh -i private_key.pem" \
+            ./ $EC2_USER@$EC2_HOST:/var/www/
           
           # Set proper permissions and verify files
           ssh -i private_key.pem $EC2_USER@$EC2_HOST "

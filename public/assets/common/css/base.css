@@ -1,0 +1,497 @@
+body {
+  font-family: 'Inter', Arial, sans-serif !important;
+  padding-top: 54px;
+  padding-bottom: 80px;
+}
+
+/* Navbar */
+:root {
+  --logo-url: url('https://cdn.peaknil.com/public/site/logo-dark.png');
+  --safe-area-inset-top: env(safe-area-inset-top, 10px); /* Fallback */
+}
+
+.navbar {
+  background: rgba(255, 255, 255, 0.23);
+  border-bottom: 1px solid #ddd;
+  backdrop-filter: blur(19.6px);
+  -webkit-backdrop-filter: blur(19.6px);
+  padding-top: var(--safe-area-inset-top);
+  /* box-shadow: 0 4px 30px rgba(0, 0, 0, .1); */
+  z-index: 20000 !important;
+}
+
+.navbar-logo {
+  content: var(--logo-url)
+}
+
+.navbar-logo {
+  margin-left: -2px;
+  height: 26px;
+  width: auto
+}
+
+/* Custom CSS to make dropdown open on hover */
+.dropdown-hover:hover .dropdown-menu {
+  display: block;
+  margin-top: 0;
+  /* Adjust if needed */
+}
+
+/* Hide the dropdown menu by default */
+.dropdown-menu {
+  display: none;
+}
+
+/* Search Bar */
+.search-input {
+  width: 100%;
+  height: 38px;
+  padding: 8px 16px 8px 16px;
+  background-color: #ececec;
+  border: none;
+  border-radius: 20px;
+  font-size: 16px
+}
+
+.search-input:focus {
+  box-shadow: rgba(9, 30, 66, 0.25) 0px 1px 1px, rgba(9, 30, 66, 0.13) 0px 0px 1px 1px;
+  outline: none
+}
+
+/* Menu */
+#menu-icon {
+  width: 24px;
+  height: 20px;
+  position: relative;
+  -webkit-transform: rotate(0);
+  -moz-transform: rotate(0);
+  -o-transform: rotate(0);
+  transform: rotate(0);
+  -webkit-transition: .5s ease-in-out;
+  -moz-transition: .5s ease-in-out;
+  -o-transition: .5s ease-in-out;
+  transition: .5s ease-in-out;
+  cursor: pointer
+}
+
+#menu-icon span {
+  display: block;
+  position: absolute;
+  height: 3px;
+  width: 100%;
+  background: #000;
+  border-radius: 3px;
+  opacity: 1;
+  left: 0;
+  -webkit-transform: rotate(0);
+  -moz-transform: rotate(0);
+  -o-transform: rotate(0);
+  transform: rotate(0);
+  -webkit-transition: .25s ease-in-out;
+  -moz-transition: .25s ease-in-out;
+  -o-transition: .25s ease-in-out;
+  transition: .25s ease-in-out
+}
+
+#menu-icon span:nth-child(1) {
+  top: 0
+}
+
+#menu-icon span:nth-child(2),
+#menu-icon span:nth-child(3) {
+  top: 9px
+}
+
+#menu-icon span:nth-child(4) {
+  top: 18px
+}
+
+#menu-icon.open span:nth-child(1) {
+  top: 9px;
+  width: 0%;
+  left: 50%
+}
+
+#menu-icon.open span:nth-child(2) {
+  -webkit-transform: rotate(45deg);
+  -moz-transform: rotate(45deg);
+  -o-transform: rotate(45deg);
+  transform: rotate(45deg)
+}
+
+#menu-icon.open span:nth-child(3) {
+  -webkit-transform: rotate(-45deg);
+  -moz-transform: rotate(-45deg);
+  -o-transform: rotate(-45deg);
+  transform: rotate(-45deg)
+}
+
+#menu-icon.open span:nth-child(4) {
+  top: 9px;
+  width: 0%;
+  left: 50%
+}
+
+.sidebar {
+  position: fixed;
+  top: 54px;
+  left: -250px;
+  width: 250px;
+  height: calc(100vh - 60px);
+  background: #fff;
+  transform: translateX(-100%);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow .3s ease;
+  will-change: transform;
+  contain: strict;
+  z-index: 1040;
+  box-shadow: rgba(100, 100, 111, .2) 0 7px 29px 0
+}
+
+.sidebar.open {
+  transform: translateX(0);
+  left: 0;
+}
+
+.sidebar.pinned {
+  transform: translateX(0);
+  left: 0;
+  box-shadow: none;
+}
+
+.content {
+  transition: all .3s ease
+}
+
+.content.pushed {
+  margin-left: 250px
+}
+
+.menu-items {
+  padding: 20px;
+  list-style: none
+}
+
+.menu-items li {
+  margin-bottom: 15px
+}
+
+.menu-items a {
+  color: #000;
+  text-decoration: none;
+  font-size: 16px
+}
+
+.pin-button {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background: 0 0;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px
+}
+
+.pin-button .unpinned-icon {
+  display: block
+}
+
+.pin-button .pinned-icon {
+  display: none
+}
+
+.pin-button.active .unpinned-icon {
+  display: none
+}
+
+.pin-button.active .pinned-icon {
+  display: block
+}
+
+.navbar-left {
+  display: flex;
+  align-items: center;
+  gap: 20px
+}
+
+/* Tabs Underline */
+
+/* Remove the gap between nav items */
+.nav-underline {
+  gap: 0 !important;
+}
+
+/* Default state of nav links (non-active) */
+.nav-underline .nav-link {
+    display: flex !important;
+      align-items: center !important;
+      gap: 0.5rem !important;
+      /* This adds space between icon and text */
+  border-bottom-color: #E7E7E7 !important;
+  color: #B2B2B2 !important;
+  font-weight: 500 !important;
+  letter-spacing: -0.015rem;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  margin-right: 1.5rem !important;
+  /* Adjust this value to control spacing between items */
+}
+
+.nav-underline .nav-link svg {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+/* Active state */
+.nav-underline .nav-link.active {
+  border-bottom-color: #1D1D1D !important;
+  color: #1D1D1D !important;
+  font-weight: 500 !important;
+  letter-spacing: -0.015rem;
+}
+
+/* Hover state */
+.nav-underline .nav-link:hover {
+  border-bottom-color: #000 !important;
+  color: #000 !important;
+  letter-spacing: -0.015rem;
+}
+
+/* Disabled state */
+.nav-underline .nav-link.disabled {
+  font-weight: 500 !important;
+  letter-spacing: -0.015rem;
+}
+
+/* Make tabs scrollable on mobile */
+.nav-tabs-scrollable {
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  white-space: nowrap;
+  scrollbar-width: none;
+  /* Firefox */
+  -ms-overflow-style: none;
+  /* IE and Edge */
+}
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+.nav-tabs-scrollable::-webkit-scrollbar {
+  display: none;
+}
+
+/* Modify nav-fill behavior */
+.nav-tabs-scrollable .nav-fill {
+  display: flex;
+  flex-wrap: nowrap;
+  width: max-content;
+  min-width: 100%;
+}
+
+/* Adjust nav items for scrolling */
+.nav-tabs-scrollable .nav-item {
+  flex: none;
+  white-space: nowrap;
+}
+
+/* Sticky navigation styling */
+.sticky-top-underline-tab {
+  top: 80px !important;
+}
+
+/* Dropdown Menu Styles */
+.dropdown-menu {
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  padding: 8px 0;
+}
+
+.dropdown-item {
+  padding: 8px 16px;
+  color: #333;
+  font-size: 14px;
+}
+
+.dropdown-item:hover {
+  background-color: #f8f9fa;
+}
+
+.dropdown-divider {
+  margin: 4px 0;
+}
+
+/* Mobile Menu */
+.menu-button {
+  border: 1px solid rgba(0, 0, 0, 0);
+  border-radius: 10px;
+  color: #000;
+  display: block;
+  font-weight: 500;
+  font-size: 0.95rem;
+  padding: 10px 12px;
+  text-decoration: none;
+  width: 100%;
+}
+
+.menu-button:hover {
+  background-color: #F1F1F1;
+  border: 1px solid #F1F1F1;
+  color: #3F3F3F;
+}
+
+.menu-button-selected {
+  background-color: #EAEDF2;
+  border: 1px solid #EAEDF2;
+  color: #0064C9;
+}
+
+/* MARK: Mobile Menu
+*/
+.tab-content {
+  display: none;
+}
+
+.tab-content.active {
+  display: block;
+}
+
+.tab-bar {
+  display: none;
+  /* Hide by default */
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: rgba(248, 248, 248, 0.92);
+  border-top: 0.5px solid rgba(0, 0, 0, 0.3);
+  padding: 0px 0;
+  z-index: 10000;
+  transition: padding-bottom 0.3s ease;
+  /* Smooth transition for padding change */
+}
+
+.tab {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: #8e8e93;
+  font-size: 10px;
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: none;
+  padding: 0px 0;
+  position: relative;
+  /* Added for positioning the badge */
+}
+
+.tab.active {
+  color: #007aff;
+}
+
+.tab-icon {
+  font-size: 24px;
+  margin-bottom: 0px;
+}
+
+/* Show on medium screens and smaller */
+@media (max-width: 992px) {
+  .tab-bar {
+    display: flex;
+    justify-content: space-around;
+  }
+}
+
+/* Style for standalone mode */
+.tab-bar {
+  padding-bottom: calc(0px + env(safe-area-inset-bottom, 0px));
+}
+
+/* Hide the content initially */
+.content-wrapper {
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+/* Show content when loaded */
+.content-loaded .content-wrapper {
+  opacity: 1;
+}
+
+/* Notification Badge */
+.notification-badge {
+  position: absolute;
+  top: 2px;
+  left: 50%;
+  transform: translateX(4px);
+  /* Adjust this value to move the badge right */
+  background-color: #FF3B30;
+  color: white;
+  border-radius: 100px;
+  padding: 1px 5px;
+  font-size: 12px;
+  min-width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* MARK: Horizontal Scrolling */
+  .scroll-wrapper {
+    position: relative;
+    width: 100%;
+  }
+
+  .scroll-container {
+    width: 100%;
+    overflow-x: auto;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+    /* for smooth scrolling on iOS */
+  }
+
+  .scroll-content {
+    display: inline-flex;
+    align-items: center;
+    padding-right: 40px;
+    /* Add padding to ensure the gradient doesn't overlap important content */
+  }
+
+  /* Hide scrollbar for Chrome, Safari and Opera */
+  .scroll-container::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Hide scrollbar for IE, Edge and Firefox */
+  .scroll-container {
+    -ms-overflow-style: none;
+    /* IE and Edge */
+    scrollbar-width: none;
+    /* Firefox */
+  }
+
+  /* Fixed gradient indicator */
+  .scroll-gradient {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 60px;
+    /* Width of the gradient */
+    background: linear-gradient(to right, rgba(255, 255, 255, 0), rgba(255, 255, 255, 1));
+    pointer-events: none;
+    /* Allows scrolling through the gradient */
+  }
+
+    .page-title {
+      border-bottom: 1px solid #eee;
+      padding-bottom: 10px;
+      display: flex;
+      align-items: center;
+    }

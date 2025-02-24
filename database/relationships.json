@@ -1,0 +1,329 @@
+{
+  "services": {
+    "relationships": [
+      {
+        "type": "one-to-many",
+        "target_table": "school_associations",
+        "source_column": "association_id",
+        "target_column": "id"
+      },
+      {
+        "type": "one-to-many",
+        "target_table": "school_conferences",
+        "source_column": "conference_id",
+        "target_column": "id"
+      }
+    ]
+  },
+  "schools": {
+    "relationships": [
+      {
+        "type": "one-to-many",
+        "target_table": "school_associations",
+        "source_column": "association_id",
+        "target_column": "id"
+      },
+      {
+        "type": "one-to-many",
+        "target_table": "school_conferences",
+        "source_column": "conference_id",
+        "target_column": "id"
+      }
+    ]
+  },
+  "school_associations": {
+    "relationships": [
+      {
+        "type": "one-to-many",
+        "target_table": "school_types",
+        "source_column": "association_type_id",
+        "target_column": "id"
+      }
+    ]
+  },
+  "school_conferences": {
+    "relationships": [
+      {
+        "type": "one-to-many",
+        "target_table": "school_associations",
+        "source_column": "school_association_id",
+        "target_column": "id"
+      }
+    ]
+  },
+  "activity_log": {
+    "relationships": [
+      {
+        "type": "one-to-many",
+        "target_table": "users",
+        "source_column": "user_id",
+        "target_column": "id"
+      },
+      {
+        "type": "one-to-many",
+        "target_table": "users",
+        "source_column": "user_id",
+        "target_column": "id"
+      }
+    ]
+  },
+  "assets": {
+    "relationships": [
+      {
+        "type": "one-to-many",
+        "target_table": "users",
+        "source_column": "uploaded_by",
+        "target_column": "uuid"
+      }
+    ]
+  },
+  "banned_users": {
+    "relationships": [
+      {
+        "type": "one-to-one",
+        "target_table": "users",
+        "source_column": "uuid",
+        "target_column": "uuid"
+      },
+      {
+        "type": "one-to-many",
+        "target_table": "users",
+        "source_column": "banned_by",
+        "target_column": "uuid"
+      }
+    ]
+  },
+  "brands_users": {
+    "relationships": [
+      {
+        "type": "many-to-many",
+        "target_table": "brands",
+        "source_column": "brand_id",
+        "target_column": "id"
+      },
+      {
+        "type": "many-to-many",
+        "target_table": "users",
+        "source_column": "user_id",
+        "target_column": "id"
+      },
+      {
+        "type": "one-to-many",
+        "target_table": "users",
+        "source_column": "added_by",
+        "target_column": "id"
+      },
+      {
+        "type": "one-to-many",
+        "target_table": "users",
+        "source_column": "deleted_by",
+        "target_column": "id"
+      }
+    ]
+  },
+  "brands": {
+    "relationships": [
+      {
+        "type": "one-to-many",
+        "target_table": "users",
+        "source_column": "created_by",
+        "target_column": "id"
+      },
+      {
+        "type": "one-to-many",
+        "target_table": "users",
+        "source_column": "delete_request_id",
+        "target_column": "id"
+      }
+    ]
+  },
+  "collection_main": {
+    "relationships": [
+      {
+        "type": "one-to-many",
+        "target_table": "users",
+        "source_column": "athlete_id",
+        "target_column": "id"
+      }
+    ]
+  },
+  "collectives_users": {
+    "relationships": [
+      {
+        "type": "many-to-many",
+        "target_table": "collectives",
+        "source_column": "collective_id",
+        "target_column": "id"
+      },
+      {
+        "type": "many-to-many",
+        "target_table": "users",
+        "source_column": "user_id",
+        "target_column": "id"
+      }
+    ]
+  },
+  "collectives": {
+    "relationships": [
+      {
+        "type": "one-to-many",
+        "target_table": "users",
+        "source_column": "created_by",
+        "target_column": "id"
+      }
+    ]
+  },
+  "deals": {
+    "relationships": [
+      {
+        "type": "one-to-many",
+        "target_table": "users",
+        "source_column": "athlete_id",
+        "target_column": "id"
+      },
+      {
+        "type": "one-to-many",
+        "target_table": "users or brands or collectives",
+        "source_column": "client_id",
+        "target_column": "id or uniqueID",
+        "comment": "The AI will need to check the prefix of client_id to determine the target table."
+      },
+      {
+        "type": "one-to-many",
+        "target_table": "users",
+        "source_column": "submitter_id",
+        "target_column": "id"
+      }
+    ]
+  },
+  "user_addresses": {
+    "relationships": [
+      {
+        "type": "one-to-many",
+        "target_table": "users",
+        "source_column": "user_id",
+        "target_column": "id"
+      },
+      {
+        "type": "one-to-one",
+        "target_table": "users",
+        "source_column": "uuid",
+        "target_column": "uuid"
+      }
+    ]
+  },
+  "user_flags": {
+    "relationships": [
+      {
+        "type": "one-to-one",
+        "target_table": "users",
+        "source_column": "uuid",
+        "target_column": "uuid"
+      }
+    ]
+  },
+  "user_metadata": {
+    "relationships": [
+      {
+        "type": "one-to-one",
+        "target_table": "users",
+        "source_column": "uuid",
+        "target_column": "uuid"
+      }
+    ]
+  },
+  "user_profiles": {
+    "relationships": [
+      {
+        "type": "one-to-many",
+        "target_table": "roles",
+        "source_column": "role_id",
+        "target_column": "id"
+      },
+      {
+        "type": "one-to-one",
+        "target_table": "assets",
+        "source_column": "profile_image_id",
+        "target_column": "id"
+      },
+      {
+        "type": "one-to-one",
+        "target_table": "assets",
+        "source_column": "cover_image_id",
+        "target_column": "id"
+      },
+      {
+        "type": "one-to-one",
+        "target_table": "level",
+        "source_column": "level_id",
+        "target_column": "id"
+      },
+      {
+        "type": "one-to-one",
+        "target_table": "positions",
+        "source_column": "position_id",
+        "target_column": "id"
+      },
+      {
+        "type": "one-to-one",
+        "target_table": "sports",
+        "source_column": "sport_id",
+        "target_column": "id"
+      },
+      {
+        "type": "one-to-one",
+        "target_table": "schools",
+        "source_column": "school_id",
+        "target_column": "id"
+      },
+      {
+        "type": "one-to-one",
+        "target_table": "teams",
+        "source_column": "team_id",
+        "target_column": "id"
+      },
+      {
+        "type": "one-to-one",
+        "target_table": "schools",
+        "source_column": "school_association",
+        "target_column": "id"
+      },
+      {
+        "type": "one-to-one",
+        "target_table": "teams",
+        "source_column": "team_association",
+        "target_column": "id"
+      }
+    ]
+  },
+  "verification_attempts": {
+    "relationships": [
+      {
+        "type": "one-to-many",
+        "target_table": "users",
+        "source_column": "user_id",
+        "target_column": "id"
+      }
+    ]
+  },
+  "workbench_activity": {
+    "relationships": [
+      {
+        "type": "one-to-many",
+        "target_table": "users",
+        "source_column": "user_id",
+        "target_column": "id"
+      }
+    ]
+  },
+  "positions": {
+    "relationships": [
+      {
+        "type": "one-to-many",
+        "target_table": "sports",
+        "source_column": "sportID",
+        "target_column": "id"
+      }
+    ]
+  }
+}

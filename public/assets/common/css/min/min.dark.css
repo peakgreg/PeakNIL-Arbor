@@ -1,0 +1,18 @@
+body{background-color:#000;color:#fff}
+/* Menu */
+#menu-icon span{background:#fff}.sidebar{background:#1f1f1f;box-shadow:rgba(255,255,255,.1) 0 7px 29px 0}.menu-items a{color:#fff}
+
+/* Buttons */
+.button{color:rgba(255,255,255,.9);background-color:#121212}.button:disabled{opacity:.5}.button:hover{box-shadow:rgba(255,255,255,.3) 0 1px 2px 0,rgba(255,255,255,.15) 0 2px 6px 2px;text-shadow:1px 1px 1px rgba(255,255,255,.1);color:rgba(255,255,255,1)}.btn-default{background-color:#333;border-color:#444;color:rgba(255,255,255,.8)!important}.btn-default:hover{border-color:#555;color:rgba(255,255,255,1)!important}.btn-blue{background-color:#1890ff;border-color:#1890ff}.btn-blue:hover{border-color:#0f5dc2}.btn-green{background-color:#00a86b;border-color:#00a86b}.btn-green:hover{border-color:#007f51}.btn-red{background-color:#ff4d4f;border-color:#ff4d4f}.btn-red:hover{border-color:#d93638}.btn-dark{background-color:#333;border-color:#333}.btn-dark:hover{border-color:#000}.btn-light{background-color:#444;border-color:#444;color:rgba(255,255,255,.9)!important}.btn-light:hover{border-color:#666}.btn-outline-blue{background-color:#0f1923;border-color:#1890ff;color:#1890ff}.btn-outline-blue:hover{color:#1890ff}.btn-outline-green{background-color:#08120c;border-color:#00a86b;color:#00a86b}.btn-outline-green:hover{color:#00a86b}.btn-outline-red{background-color:#1a0d0c;border-color:#ff4d4f;color:#ff4d4f}.btn-outline-red:hover{color:#ff4d4f}.btn-outline-dark{background-color:#333;border-color:#1a1a1a;color:rgba(255,255,255,.9)}.btn-outline-dark:hover{color:rgba(255,255,255,1)}.btn-outline-light{background-color:#2b2b2b;border-color:#444;color:rgba(255,255,255,.9)}.btn-outline-light:hover{color:rgba(255,255,255,1)}.btn-outline-default{background-color:#333;border-color:#444!important;color:rgba(255,255,255,.9)!important}.btn-outline-default:hover{color:rgba(255,255,255,1)!important}
+
+/* Navbar */
+:root{--logo-url:url('https://cdn.peaknil.com/public/site/logo-white.png')}.navbar{background:#1f1f1f;background:rgba(31,31,31,.67)}.search-icon{color:#ccc}.search-input{background-color:#333;color:#fff}
+
+/* Modals */
+.modal-window{background-color:rgba(0,0,0,.5);backdrop-filter:blur(4px)}.modal-content{background:#1f1f1f;color:#fff}.modal-close{color:#ccc}.modal-close:hover{color:#fff}
+
+/* Inputs */
+label{background-color:rgba(0,0,0,0);color:#ccc}input,select,textarea{background-color:#2b2b2b;border:1px solid #444;box-shadow:rgba(255,255,255,.02) 0 1px 3px 0,rgba(255,255,255,.15) 0 0 0 1px;color:#fff}input:hover,select:hover,textarea:hover{border-color:#666;background-color:#3a3a3a;box-shadow:rgba(255,255,255,.05) 0 1px 3px 0,rgba(255,255,255,.15) 0 0 0 1px}input:active,input:focus,select:active,select:focus,textarea:active,textarea:focus{border-color:#999;background-color:#2b2b2b;box-shadow:rgba(255,255,255,.1) 0 1px 3px 0,rgba(255,255,255,.4) 0 0 0 2px}.switch .tgl-light+.tgl-btn{background:#444}.switch .tgl-light+.tgl-btn:after{background:#e7e7e7}.switch .tgl-light:checked+.tgl-btn{background:#1890ff}
+
+/* Tabs */
+section{background:#2b2b2b}label{color:#bbb;background:rgba(0,0,0,0)}input:checked+label{color:#ddd;background:#444}.tab-icon{color:#fff!important}
