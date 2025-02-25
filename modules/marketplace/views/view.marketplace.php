@@ -17,7 +17,6 @@ if (isset($_SESSION['uuid'])) {
 <link rel="stylesheet" href="/assets/modules/marketplace/css/card_1.css">
 <link rel="stylesheet" href="/assets/modules/marketplace/css/card_2.css">
 
-
 <div class="container-fluid pt-3">
   <div class="row">
     <?php // MARK: Cards
