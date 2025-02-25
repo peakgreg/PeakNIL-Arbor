@@ -21,18 +21,33 @@ This meant that the path resolution was not working correctly in production, cau
 
 ## Solution Implemented
 
-1. **Environment Detection and Path Resolution**:
-   - Modified `config/init.php` to detect the production environment by checking if `$_SERVER['DOCUMENT_ROOT']` is `/var/www/html`
-   - If in production, set `ROOT_PATH` to `/var/www`
+1. **Enhanced Environment Detection and Path Resolution**:
+   - Modified `config/init.php` to use multiple methods for detecting the production environment:
+     - Check if `$_SERVER['DOCUMENT_ROOT']` is `/var/www/html`
+     - Check if `$_SERVER['SCRIPT_FILENAME']` contains `/var/www/html/`
+     - Check for the existence of typical production directories
+   - Added dynamic path resolution that tries multiple possible paths in production:
+     - Try `/var/www`
+     - Try `/var/www/html/..`
+     - Try `dirname($_SERVER['DOCUMENT_ROOT'])`
+     - Try `dirname(dirname($_SERVER['SCRIPT_FILENAME']))`
+   - Verify that the selected path contains the modules directory
    - If in development, keep the existing definition (`dirname(__DIR__)`)
 
-2. **Enhanced Logging**:
+2. **Comprehensive Logging**:
    - Added detailed logging for path resolution to aid debugging
    - Log the environment detection and the resolved paths
+   - Verify and log the existence of critical paths
+   - Log all file inclusion attempts and their results
 
-3. **Robust File Inclusion**:
-   - Added file existence checks before including files in the marketplace view
-   - Implemented user-friendly error messages when files are not found
+3. **Robust File Inclusion with Fallbacks**:
+   - Implemented a fallback mechanism for all included files in the marketplace view
+   - Each include now tries multiple possible locations for the file:
+     - Standard path using `MODULES_PATH`
+     - Alternative paths for production using absolute paths
+     - Relative paths based on the current file's location
+   - Added user-friendly error messages when files are not found
+   - Provided graceful degradation with minimal header/footer when files cannot be found
    - Enhanced error handling to prevent fatal errors and provide more context
 
 ## Implementation Details

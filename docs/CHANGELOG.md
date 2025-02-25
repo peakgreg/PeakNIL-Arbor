@@ -8,10 +8,13 @@
 ### Fixed
 - Fixed file path resolution issue in production environment:
   - Updated `config/init.php` to detect production environment and set correct paths
-  - Added environment-specific path resolution for ROOT_PATH
+  - Added environment-specific path resolution for ROOT_PATH with multiple detection methods
   - Implemented detailed logging for path resolution to aid debugging
   - Added file existence checks in marketplace view files with user-friendly error messages
   - Enhanced error handling for included files to prevent fatal errors
+  - Implemented robust fallback mechanisms for all included files
+  - Added multiple alternative path checks for each included file
+  - Provided graceful degradation with minimal header/footer when files cannot be found
 
 ## [2025-02-03]
 - Updated NIL services filter UI to dropdown style
