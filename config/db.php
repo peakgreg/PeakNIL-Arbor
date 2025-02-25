@@ -16,29 +16,24 @@ $dbConfig = [
 // Initialize global mysqli connection
 try {
     // Create connection and store in both $db and $conn
-    $db = $conn = mysqli_init();
-    $db->options(MYSQLI_OPT_SSL_VERIFY_SERVER_CERT, true);
-    $db->ssl_set(NULL, NULL, NULL, NULL, NULL);
-
-    if (!$db->real_connect(
+    $db = $conn = new mysqli(
         $dbConfig['host'],
         $dbConfig['user'],
         $dbConfig['password'],
-        $dbConfig['name'],
-        3306,
-        NULL,
-        MYSQLI_CLIENT_SSL
-    )) {
-        throw new Exception("MySQLi connection failed: " . mysqli_connect_error());
+        $dbConfig['name']
+    );
+    
+    if ($db->connect_error) {
+        throw new Exception("MySQLi connection failed: " . $db->connect_error);
     }
-
+    
     // Set charset
     $db->set_charset($dbConfig['charset']);
-
+    
     // Make connections available globally
     $GLOBALS['db'] = $db;
     $GLOBALS['conn'] = $conn;
-
+    
 } catch (Exception $e) {
     error_log("Database connection error: " . $e->getMessage());
     die("Database connection error: " . $e->getMessage());
