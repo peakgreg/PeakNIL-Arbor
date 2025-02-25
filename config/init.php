@@ -1,11 +1,24 @@
 <?php
-// Define root path using dirname to get parent directory of config
-define('ROOT_PATH', dirname(__DIR__));  // This goes up one level from config/
+// Define root path based on environment
+if (isset($_SERVER['DOCUMENT_ROOT']) && $_SERVER['DOCUMENT_ROOT'] === '/var/www/html') {
+    // Production environment
+    define('ROOT_PATH', '/var/www');
+    error_log('Environment detected: PRODUCTION - ROOT_PATH set to: ' . '/var/www');
+} else {
+    // Development environment
+    define('ROOT_PATH', dirname(__DIR__));  // This goes up one level from config/
+    error_log('Environment detected: DEVELOPMENT - ROOT_PATH set to: ' . dirname(__DIR__));
+}
 
 // Define other paths relative to ROOT_PATH
 define('CONFIG_PATH', ROOT_PATH . '/config');
 define('MODULES_PATH', ROOT_PATH . '/modules');
 define('AUTH_PATH', ROOT_PATH . '/auth');
+
+// Log the resolved paths for debugging
+error_log('Path resolution: CONFIG_PATH = ' . CONFIG_PATH);
+error_log('Path resolution: MODULES_PATH = ' . MODULES_PATH);
+error_log('Path resolution: AUTH_PATH = ' . AUTH_PATH);
 
 // Load environment variables using Dotenv
 require_once ROOT_PATH . '/vendor/autoload.php';

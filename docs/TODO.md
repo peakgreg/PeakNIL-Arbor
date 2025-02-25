@@ -1,3 +1,12 @@
+# Immediate Tasks
+
+## Testing & Verification
+- Test path resolution fix in production environment (2025-02-24)
+  - Verify that header and footer files are correctly loaded
+  - Check error logs for path resolution messages
+  - Ensure marketplace page loads correctly
+  - Test with both authenticated and unauthenticated users
+
 # Authentication Platform Improvements
 
 - Add Crawler detection. (https://github.com/JayBizzle/Crawler-Detect/tree/master)
