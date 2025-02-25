@@ -7,6 +7,24 @@ define('CONFIG_PATH', ROOT_PATH . '/config');
 define('MODULES_PATH', ROOT_PATH . '/modules');
 define('AUTH_PATH', ROOT_PATH . '/auth');
 
+// Load environment variables using Dotenv
+require_once ROOT_PATH . '/vendor/autoload.php';
+
+// Try to load .env file, but don't fail if it doesn't exist in production
+try {
+    $dotenv = Dotenv\Dotenv::createImmutable(ROOT_PATH);
+    $dotenv->load();
+} catch (Exception $e) {
+    // In production, we might use environment variables set at the server level
+    // so we don't want to fail if .env doesn't exist
+    error_log("Warning: .env file could not be loaded: " . $e->getMessage());
+    
+    // Ensure critical environment variables exist
+    if (!isset($_ENV['DB_HOST']) && !getenv('DB_HOST')) {
+        die("Critical environment variables are missing. Please check your configuration.");
+    }
+}
+
 // Core configuration and sessions first
 require_once CONFIG_PATH . '/config.php';
 require_once CONFIG_PATH . '/sessions.php';

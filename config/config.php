@@ -1,28 +1,5 @@
 <?php
-/**
- * Load environment variables from .env file
- */
-function load_env() {
-    $env_file = dirname(__DIR__) . '/.env';
-    if (file_exists($env_file)) {
-        $lines = file($env_file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-        foreach ($lines as $line) {
-            if (strpos($line, '#') === 0) continue; // Skip comments
-            list($name, $value) = explode('=', $line, 2);
-            $name = trim($name);
-            $value = trim($value);
-            // Remove quotes if present
-            if (strpos($value, '"') === 0 && strrpos($value, '"') === strlen($value) - 1) {
-                $value = substr($value, 1, -1);
-            }
-            putenv("$name=$value");
-            $_ENV[$name] = $value;
-        }
-    }
-}
-
-// Load environment variables
-load_env();
+// Environment variables are now loaded via Dotenv in init.php
 
 /**
  * Application Configuration
