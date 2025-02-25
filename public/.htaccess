@@ -1,22 +1,16 @@
-# public/.htaccess
-RewriteEngine On
-RewriteBase /
+# Enable URL rewriting
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
 
-# Allow direct access to actual files and directories
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteCond %{REQUEST_FILENAME} !-d
+  # Route requests to index.php if the requested resource does not exist
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteRule ^ index.php [L]
+</IfModule>
 
-# Forward everything else to index.php
-RewriteRule ^(.*)$ index.php [QSA,L]
-
-# Protect config files
-<FilesMatch "^\.">
-    Order allow,deny
-    Deny from all
+# Deny access to hidden files such as .git and .htaccess itself
+<FilesMatch "^\.(ht|git)">
+  Order allow,deny
+  Deny from all
 </FilesMatch>
-
-# Disable directory browsing
-Options -Indexes
-
-# Protect against script injections
-Options +FollowSymLinks -Multiviews
