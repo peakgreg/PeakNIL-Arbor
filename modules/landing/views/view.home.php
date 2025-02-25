@@ -1,5 +1,21 @@
-<?php require_once MODULES_PATH . '/common/views/public/view.header.php'; ?>
+<?php
+// Include the file inclusion helper functions
+require_once MODULES_PATH . '/common/functions/include_functions.php';
 
-Landing
+// Include header (false = not authenticated)
+include_header(false);
+?>
 
-<?php require_once MODULES_PATH . '/common/views/public/view.footer.php'; ?>
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <h1 class="mb-4">Welcome to PeakNIL</h1>
+            <p class="lead">Your platform for NIL opportunities.</p>
+        </div>
+    </div>
+</div>
+
+<?php
+// Include footer (false = not authenticated)
+include_footer(false);
+?>

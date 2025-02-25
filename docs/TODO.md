@@ -7,6 +7,16 @@
   - Ensure marketplace page loads correctly
   - Test with both authenticated and unauthenticated users
 
+## Implementation Tasks
+- Update all views to use the universal file inclusion system (2025-02-25)
+  - Replace direct require/include statements with include_* functions
+  - Priority order:
+    1. Main module views (marketplace, profile, dashboard, settings)
+    2. Auth views (login, register, reset-password)
+    3. Secondary module views (wallet, landing)
+  - Test each view after updating
+  - Document any issues or edge cases encountered
+
 # Authentication Platform Improvements
 
 - Add Crawler detection. (https://github.com/JayBizzle/Crawler-Detect/tree/master)
