@@ -15,12 +15,17 @@ $dbConfig = [
 
 // Initialize global mysqli connection
 try {
-    // Create connection and store in both $db and $conn
-    $db = $conn = new mysqli(
+    // Create connection with SSL enabled and store in both $db and $conn
+    $db = $conn = mysqli_init();
+    $db->ssl_set(NULL, NULL, NULL, NULL, NULL);
+    $db->real_connect(
         $dbConfig['host'],
         $dbConfig['user'],
         $dbConfig['password'],
-        $dbConfig['name']
+        $dbConfig['name'],
+        3306, // default port
+        NULL,
+        MYSQLI_CLIENT_SSL // Enable SSL
     );
     
     if ($db->connect_error) {

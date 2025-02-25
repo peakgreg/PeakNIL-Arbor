@@ -77,8 +77,11 @@ define('SESSION_LIFETIME', 1800);       // Session timeout in seconds (30 minute
 define('IS_DEVELOPMENT', in_array($_SERVER['HTTP_HOST'] ?? '', ['localhost', '127.0.0.1', 'localhost:8888']));
 define('IS_PRODUCTION', !IS_DEVELOPMENT);
 
+// Error Reporting Settings
+define('DISPLAY_ERRORS_IN_PRODUCTION', true); // Set to true to show errors in production
+
 // Set error reporting based on environment
-if (IS_DEVELOPMENT) {
+if (IS_DEVELOPMENT || (IS_PRODUCTION && DISPLAY_ERRORS_IN_PRODUCTION)) {
     error_reporting(E_ALL);
     ini_set('display_errors', 1);
 } else {

@@ -1,14 +1,9 @@
-# Changelog
+- Added a new environment variable `DISPLAY_ERRORS_PRODUCTION` to temporarily enable error display in production. Set to `true` in the `.env` file to enable, `false` or remove the line to disable.
 
 ## Unreleased
 
 ### Added
 - Added GitHub Actions workflow to test EC2 connection on push to main branch.
-
-## [2025-02-24]
-- Updated config/db.php to use PDO for database connection
-    - Replaced MySQLi with PDO to handle potential SSL issues
-    - Maintained existing error handling and charset settings
 
 ## [2025-02-03]
 - Updated NIL services filter UI to dropdown style
