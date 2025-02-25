@@ -40,15 +40,25 @@ This meant that the path resolution was not working correctly in production, cau
    - Verify and log the existence of critical paths
    - Log all file inclusion attempts and their results
 
-3. **Robust File Inclusion with Fallbacks**:
-   - Implemented a fallback mechanism for all included files in the marketplace view
+3. **Comprehensive Robust File Inclusion with Fallbacks**:
+   - Implemented a fallback mechanism for all included files across multiple views:
+     - Marketplace view (header, footer, browse menu, product types, card templates)
+     - Auth header (navigation)
+     - Auth footer (mobile menu, debug file)
+     - Public header (navigation)
+     - Public footer (login modal, debug file)
    - Each include now tries multiple possible locations for the file:
      - Standard path using `MODULES_PATH`
      - Alternative paths for production using absolute paths
      - Relative paths based on the current file's location
+     - Cross-directory fallbacks (e.g., try auth version if public version not found)
    - Added user-friendly error messages when files are not found
-   - Provided graceful degradation with minimal header/footer when files cannot be found
+   - Provided graceful degradation with minimal implementations when files cannot be found:
+     - Basic header with site name
+     - Simple footer with copyright
+     - Minimal navigation with essential links
    - Enhanced error handling to prevent fatal errors and provide more context
+   - Detailed logging of all file inclusion attempts for easier debugging
 
 ## Implementation Details
 
