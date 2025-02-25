@@ -5,22 +5,6 @@
 ### Added
 - Added GitHub Actions workflow to test EC2 connection on push to main branch.
 
-### Fixed
-- Fixed file path resolution issue in production environment:
-  - Updated `config/init.php` to detect production environment and set correct paths
-  - Added environment-specific path resolution for ROOT_PATH with multiple detection methods
-  - Implemented detailed logging for path resolution to aid debugging
-  - Added file existence checks in marketplace view files with user-friendly error messages
-  - Enhanced error handling for included files to prevent fatal errors
-  - Implemented robust fallback mechanisms for all included files:
-    - Added fallbacks for header and footer files in marketplace view
-    - Added fallbacks for debug file in auth and public footers
-    - Added fallbacks for mobile menu in auth footer
-    - Added fallbacks for login modal in public footer
-    - Added fallbacks for navigation in auth and public headers
-  - Added multiple alternative path checks for each included file
-  - Provided graceful degradation with minimal header/footer/navigation when files cannot be found
-
 ## [2025-02-03]
 - Updated NIL services filter UI to dropdown style
     - Converted horizontal filters to dropdown-based layout
