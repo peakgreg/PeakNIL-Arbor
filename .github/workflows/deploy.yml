@@ -24,7 +24,7 @@
 #      - /var/www (protected application code)
 #
 # 5. File Deployment - Split Structure
-#    - Public Content: Copies /public directory to /var/www/html/
+#    - Public Content: Copies /html directory to /var/www/html/
 #    - Application Code: Copies other files to /var/www/
 #    - Excluded Files/Directories:
 #      - .git* files and directories
@@ -93,8 +93,8 @@ jobs:
           "
           
           # Copy public directory contents to /var/www/html
-          echo "Uploading /public contents to /var/www/html..."
-          rsync -av --exclude='.git*' --exclude='private_key.pem' -e "ssh -i private_key.pem" ./public/ $EC2_USER@$EC2_HOST:/var/www/html/
+          echo "Uploading /html contents to /var/www/html..."
+          rsync -av --exclude='.git*' --exclude='private_key.pem' -e "ssh -i private_key.pem" ./html/ $EC2_USER@$EC2_HOST:/var/www/html/
           
           # Copy everything else (excluding public directory) to /var/www
           echo "Uploading non-public files to /var/www..."
@@ -103,7 +103,7 @@ jobs:
             --exclude='.gitattributes' \
             --exclude='.gitignore' \
             --exclude='private_key.pem' \
-            --exclude='./public' \
+            --exclude='./html' \
             --exclude='docs' \
             --exclude='.github' \
             --exclude='database' \

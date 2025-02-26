@@ -28,7 +28,7 @@
 ### Production (EC2 Deployment)
 - Access via http://3.133.107.107/
 - Split directory structure for security:
-  - `/var/www/html/` - Contains only public files (from /public directory)
+  - `/var/www/html/` - Contains only public files (from /html directory)
   - `/var/www/` - Contains application code (everything else)
 - Uses Composer with `--no-dev --classmap-authoritative` flags
 - File permissions: 755 for directories, 644 for files

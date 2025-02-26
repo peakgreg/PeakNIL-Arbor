@@ -57,7 +57,7 @@ modules/[module_name]/
 Module assets must be organized in the public directory:
 
 ```
-public/assets/modules/[module_name]/
+html/assets/modules/[module_name]/
 ├── css/
 │   └── [module_name].css
 └── js/
@@ -68,7 +68,7 @@ public/assets/modules/[module_name]/
 
 To add a new module to the platform:
 
-1. Open `public/index.php`
+1. Open `html/index.php`
 2. Add a new case to the main routing switch statement:
    ```php
    case '[module_name]':
@@ -153,7 +153,7 @@ Here's an example of creating a "blog" module:
    }
    ```
 
-4. Update router in `public/index.php`:
+4. Update router in `html/index.php`:
    ```php
    case 'blog':
        require_once MODULES_PATH . '/blog/blog.php';
@@ -162,7 +162,7 @@ Here's an example of creating a "blog" module:
 
 5. Create assets:
    ```
-   public/assets/modules/blog/
+   html/assets/modules/blog/
    ├── css/
    │   └── blog.css
    └── js/
@@ -180,7 +180,7 @@ After creating a new module:
 
 ## Common Issues
 
-1. **404 Errors**: Check router configuration in `public/index.php`
+1. **404 Errors**: Check router configuration in `html/index.php`
 2. **Missing Functions**: Verify all required files are included
 3. **Authentication Issues**: Ensure `require_auth()` is properly placed
-4. **Asset Loading**: Confirm correct paths in public/assets
+4. **Asset Loading**: Confirm correct paths in html/assets

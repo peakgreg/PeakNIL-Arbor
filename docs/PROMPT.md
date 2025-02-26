@@ -198,7 +198,7 @@ Database management
 - `/seeds` - Initial/test data
 - `schema.sql` - Complete schema
 
-## /public
+## /html
 Publicly accessible files
 - `index.php` - Main entry point
 - `/assets` - CSS, JS, images
@@ -242,7 +242,7 @@ Key aspects:
 
 2. **Application Structure**
 - Procedural Modular Architecture
-- Separation of public/private files
+- Separation of html/private files
 - Module-based organization
 - Proper routing system
 
@@ -270,7 +270,7 @@ We have established:
 6. Set up settings module
 
 ## Key Files Reference
-- `public/index.php`: Main entry point
+- `html/index.php`: Main entry point
 - `config/init.php`: Application initialization
 - `auth/middleware/auth_middleware.php`: Authentication checks
 - `database/schema/`: All database table definitions
