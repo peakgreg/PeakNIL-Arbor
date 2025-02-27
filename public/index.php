@@ -1,6 +1,7 @@
 <?php
 
 error_log('Starting html/index.php');
+error_log('Request received: ' . $_SERVER['REQUEST_URI']);
 
 // Load initialization
 require_once __DIR__ . '/../config/init.php';
@@ -13,13 +14,14 @@ error_log('Index.php - Session data: ' . print_r($_SESSION, true));
 $request_uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $request = trim($request_uri, '/');
 
+error_log('Request URI: ' . $request_uri);
+error_log('Parsed request: ' . $request);
+
 // Redirect logged-in users from root to login
 if ($request === '' && isset($_SESSION['uuid'])) {
     header('Location: /login');
     exit;
 }
-
-error_log('Request URI: ' . $request_uri);
 
 // Split the URL into parts
 $request_parts = explode('/', $request);
