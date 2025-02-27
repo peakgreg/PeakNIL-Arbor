@@ -35,6 +35,14 @@ switch ($module) {
         break;
 
     case 'marketplace':
+        error_log('Accessing marketplace route');
+        error_log('MODULES_PATH is: ' . MODULES_PATH);
+        error_log('Full path being included: ' . MODULES_PATH . '/marketplace/marketplace.php');
+        if (file_exists(MODULES_PATH . '/marketplace/marketplace.php')) {
+            error_log('File exists');
+        } else {
+            error_log('File does not exist');
+        }
         require_once MODULES_PATH . '/marketplace/marketplace.php';
         break;
 
