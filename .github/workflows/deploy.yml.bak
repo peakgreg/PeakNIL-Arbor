@@ -1,7 +1,8 @@
 # EC2 Deployment Workflow
 #
 # Overview:
-# This workflow automates deployment of a web application to an Amazon EC2 instance.
+# This workflow automates deployment of a web application to an Amazon EC2 instance,
+# separating public content from application code for improved security.
 #
 # Trigger: Push to main branch
 # Environment: Ubuntu Latest
@@ -17,8 +18,14 @@
 # 3. Connection Testing
 #    - Verifies connectivity to EC2 instance
 #
-# 4. File Deployment
-#    - Uploads files directly to server without changing directory structure
+# 4. Directory Preparation
+#    - Creates and sets ownership for:
+#      - /var/www/html (public web root)
+#      - /var/www (protected application code)
+#
+# 5. File Deployment - Split Structure
+#    - Public Content: Copies /public directory to /var/www/html/
+#    - Application Code: Copies other files to /var/www/
 #    - Excluded Files/Directories:
 #      - .git* files and directories
 #      - .github directory
@@ -26,21 +33,25 @@
 #      - .clinerules
 #      - .gitattributes and .gitignore
 #
-# 5. Composer Dependencies Installation
+# 6. Composer Dependencies Installation
 #    - Runs composer install in production mode
 #    - Installs packages to /var/www/vendor
 #
-# 6. PHP Cache Clearing
+# 7. Permission Management
+#    - Sets 755 for directories (rwxr-xr-x)
+#    - Sets 644 for files (rw-r--r--)
+#
+# 8. PHP Cache Clearing
 #    - Clears OPcache and APCu if available
 #
-# 7. Service Restart
+# 9. Service Restart
 #    - Restarts PHP services (PHP-FPM or PHP)
 #    - Restarts Apache web server
 #
-# 8. File Cache Refresh
+# 10. File Cache Refresh
 #    - Touches all PHP files to refresh file-based caches
 #
-# 9. Cleanup
+# 11. Cleanup
 #    - Removes temporary private key file
 #
 # Required Secrets:
@@ -73,13 +84,26 @@ jobs:
           # Test connection
           ssh -o StrictHostKeyChecking=no -i private_key.pem $EC2_USER@$EC2_HOST "echo 'Connection successful!'"
           
-          # Upload all files with exclusions
-          echo "Uploading repository contents..."
+          # Ensure both directories exist and set permissions
+          ssh -i private_key.pem $EC2_USER@$EC2_HOST "
+            sudo mkdir -p /var/www/html &&
+            sudo mkdir -p /var/www &&
+            sudo chown -R $EC2_USER:$EC2_USER /var/www/html &&
+            sudo chown -R $EC2_USER:$EC2_USER /var/www
+          "
+          
+          # Copy public directory contents to /var/www/html
+          echo "Uploading /public contents to /var/www/html..."
+          rsync -av --exclude='.git*' --exclude='private_key.pem' -e "ssh -i private_key.pem" ./public/ $EC2_USER@$EC2_HOST:/var/www/html/
+          
+          # Copy everything else (excluding public directory) to /var/www
+          echo "Uploading non-public files to /var/www..."
           rsync -av \
             --exclude='.git*' \
             --exclude='.gitattributes' \
             --exclude='.gitignore' \
             --exclude='private_key.pem' \
+            --exclude='./public' \
             --exclude='docs' \
             --exclude='.github' \
             --exclude='database' \
@@ -119,12 +143,18 @@ jobs:
               --prefer-dist
           "
           
-          # Verify files
+          # Set proper permissions and verify files
           ssh -i private_key.pem $EC2_USER@$EC2_HOST "
+            echo 'Uploaded files to /var/www/html:' &&
+            ls -la /var/www/html/ &&
             echo 'Uploaded files to /var/www:' &&
             ls -la /var/www/ &&
             echo 'Installed vendor dependencies:' &&
-            ls -la /var/www/vendor/
+            ls -la /var/www/vendor/ &&
+            sudo chmod -R 755 /var/www/html/ &&
+            sudo chmod -R 755 /var/www/ &&
+            sudo find /var/www/html/ -type f -exec chmod 644 {} \; &&
+            sudo find /var/www/ -type f -exec chmod 644 {} \;
           "
           
           # Clear PHP caches and restart services
@@ -150,6 +180,7 @@ jobs:
             echo 'Restarting Apache...' &&
             sudo systemctl restart apache2 2>/dev/null || sudo service apache2 restart 2>/dev/null || echo 'Apache restart attempted' &&
             # Clear PHP file cache by touching files if needed
+            find /var/www/html -name '*.php' -exec touch {} \; &&
             find /var/www -name '*.php' -exec touch {} \; &&
             echo 'PHP files touched to refresh file cache' &&
             echo 'PHP cache clearing and service restarts completed!'
