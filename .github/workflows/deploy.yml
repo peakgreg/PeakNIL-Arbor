@@ -3,14 +3,13 @@ on:
   push:
     branches:
       - main  # Trigger deployment on pushes to the main branch
-
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3  # Check out the code from the repository
-
+      
       - name: Deploy to EC2
         env:
           EC2_PRIVATE_KEY: ${{ secrets.EC2_PRIVATE_KEY }}
@@ -18,6 +17,9 @@ jobs:
           # Create the private key file from the secret
           echo "$EC2_PRIVATE_KEY" > private_key.pem
           chmod 600 private_key.pem
+          
+          # Ensure the correct directory structure exists with proper ownership
+          ssh -o StrictHostKeyChecking=no -i private_key.pem ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "sudo mkdir -p /var/www && sudo chown ec2-user:ec2-user /var/www"
           
           # Use rsync to deploy the code to EC2
           rsync -avz --delete --omit-dir-times --no-perms --no-owner --no-group \
@@ -31,31 +33,35 @@ jobs:
           --exclude='.gitignore' \
           --exclude='.DS_Store' \
           -e "ssh -o StrictHostKeyChecking=no -i private_key.pem" \
-          ./ ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:/var/www/html/ || [ $? -eq 23 ]
+          ./ ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:/var/www/ || [ $? -eq 23 ]
           
           # Run Composer install on the EC2 server
-          ssh -o StrictHostKeyChecking=no -i private_key.pem ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "cd /var/www/html/ && composer install --no-dev --optimize-autoloader"
+          ssh -o StrictHostKeyChecking=no -i private_key.pem ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "cd /var/www/ && composer install --no-dev --optimize-autoloader"
           
           # Optional: Clear Composer cache to save space
           ssh -o StrictHostKeyChecking=no -i private_key.pem ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "composer clear-cache"
           
-          # **Delete composer.json and composer.lock from the production server**
-          ssh -o StrictHostKeyChecking=no -i private_key.pem ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "rm -f /var/www/html/composer.json /var/www/html/composer.lock"
+          # Delete composer.json and composer.lock from the production server
+          ssh -o StrictHostKeyChecking=no -i private_key.pem ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "rm -f /var/www/composer.json /var/www/composer.lock"
+          
+          # Keep ownership as ec2-user for main directory
+          ssh -o StrictHostKeyChecking=no -i private_key.pem ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "sudo chown -R ec2-user:ec2-user /var/www"
           
           # Clean up private key on EC2 server
-          ssh -o StrictHostKeyChecking=no -i private_key.pem ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "rm -f /var/www/html/private_key.pem"
-
+          ssh -o StrictHostKeyChecking=no -i private_key.pem ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "rm -f /var/www/private_key.pem"
+          
+          # Verify directory structure and permissions
+          ssh -o StrictHostKeyChecking=no -i private_key.pem ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "ls -ld /var/www"
+      
       - name: Cleanup
         if: always()  # This ensures the step runs even if previous steps fail
         run: |
           # Print working directory and list files
           pwd
           ls -la
-          
           # Try multiple cleanup methods
           rm -f private_key.pem
           find . -name "private_key.pem" -exec rm -f {} \;
           find /home/runner/work -name "private_key.pem" -exec rm -f {} \;
-          
           # Verify deletion
           ls -la private_key.pem || echo "File not found - successfully deleted"
