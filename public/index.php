@@ -1,9 +1,6 @@
 <?php
-error_log('Starting index.php, REQUEST_URI: ' . $_SERVER['REQUEST_URI']);
-error_log('Debug parameter: ' . (isset($_GET['debug_route']) ? 'yes' : 'no'));
 
 error_log('Starting html/index.php');
-error_log('Request received: ' . $_SERVER['REQUEST_URI']);
 
 // Load initialization
 require_once __DIR__ . '/../config/init.php';
@@ -16,14 +13,13 @@ error_log('Index.php - Session data: ' . print_r($_SESSION, true));
 $request_uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $request = trim($request_uri, '/');
 
-error_log('Request URI: ' . $request_uri);
-error_log('Parsed request: ' . $request);
-
 // Redirect logged-in users from root to login
 if ($request === '' && isset($_SESSION['uuid'])) {
     header('Location: /login');
     exit;
 }
+
+error_log('Request URI: ' . $request_uri);
 
 // Split the URL into parts
 $request_parts = explode('/', $request);
@@ -39,14 +35,6 @@ switch ($module) {
         break;
 
     case 'marketplace':
-        error_log('Accessing marketplace route');
-        error_log('MODULES_PATH is: ' . MODULES_PATH);
-        error_log('Full path being included: ' . MODULES_PATH . '/marketplace/marketplace.php');
-        if (file_exists(MODULES_PATH . '/marketplace/marketplace.php')) {
-            error_log('File exists');
-        } else {
-            error_log('File does not exist');
-        }
         require_once MODULES_PATH . '/marketplace/marketplace.php';
         break;
 
