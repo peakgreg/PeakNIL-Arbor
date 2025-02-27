@@ -1,14 +1,4 @@
 <?php
-
-// Report all PHP errors
-error_reporting(E_ALL);
-
-// Display errors on screen
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1
-
-echo "test";
-
 error_log('Starting html/index.php');
 
 // Load initialization
