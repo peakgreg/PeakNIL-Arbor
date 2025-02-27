@@ -1,4 +1,6 @@
 <?php
+error_log('Starting index.php, REQUEST_URI: ' . $_SERVER['REQUEST_URI']);
+error_log('Debug parameter: ' . (isset($_GET['debug_route']) ? 'yes' : 'no'));
 
 error_log('Starting html/index.php');
 error_log('Request received: ' . $_SERVER['REQUEST_URI']);
