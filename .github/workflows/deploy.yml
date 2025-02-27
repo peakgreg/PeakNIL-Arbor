@@ -1,7 +1,8 @@
 # EC2 Deployment Workflow
 #
 # Overview:
-# This workflow automates deployment of a web application to an Amazon EC2 instance.
+# This workflow automates deployment of a web application to an Amazon EC2 instance,
+# separating public content from application code for improved security.
 #
 # Trigger: Push to main branch
 # Environment: Ubuntu Latest
@@ -17,8 +18,13 @@
 # 3. Connection Testing
 #    - Verifies connectivity to EC2 instance
 #
-# 4. File Deployment
-#    - Uploads files directly to server without changing directory structure
+# 4. Directory Preparation
+#    - Creates and sets ownership for:
+#      - /var/www (protected application code)
+#      - /var/www/public (publicly accessible web root)
+#
+# 5. File Deployment
+#    - Uploads files to the server
 #    - Excluded Files/Directories:
 #      - .git* files and directories
 #      - .github directory
@@ -26,21 +32,25 @@
 #      - .clinerules
 #      - .gitattributes and .gitignore
 #
-# 5. Composer Dependencies Installation
+# 6. Composer Dependencies Installation
 #    - Runs composer install in production mode
 #    - Installs packages to /var/www/vendor
 #
-# 6. PHP Cache Clearing
+# 7. Permission Management
+#    - Sets secure permissions for application directories
+#    - Ensures web server can access public content
+#
+# 8. PHP Cache Clearing
 #    - Clears OPcache and APCu if available
 #
-# 7. Service Restart
+# 9. Service Restart
 #    - Restarts PHP services (PHP-FPM or PHP)
 #    - Restarts Apache web server
 #
-# 8. File Cache Refresh
+# 10. File Cache Refresh
 #    - Touches all PHP files to refresh file-based caches
 #
-# 9. Cleanup
+# 11. Cleanup
 #    - Removes temporary private key file
 #
 # Required Secrets:
@@ -72,6 +82,21 @@ jobs:
         run: |
           # Test connection
           ssh -o StrictHostKeyChecking=no -i private_key.pem $EC2_USER@$EC2_HOST "echo 'Connection successful!'"
+          
+          # Ensure directories exist with proper permissions
+          echo "Setting up directory structure..."
+          ssh -i private_key.pem $EC2_USER@$EC2_HOST "
+            # Create directories if they don't exist
+            sudo mkdir -p /var/www
+            sudo mkdir -p /var/www/public
+            
+            # Set ownership to the web server user (typically www-data for Apache)
+            sudo chown -R $EC2_USER:www-data /var/www
+            
+            # Set base permissions
+            sudo chmod -R 750 /var/www          # rwxr-x--- (owner can read/write/execute, group can read/execute)
+            sudo chmod -R 755 /var/www/public   # rwxr-xr-x (owner can read/write/execute, group and others can read/execute)
+          "
           
           # Upload all files with exclusions
           echo "Uploading repository contents..."
@@ -119,12 +144,24 @@ jobs:
               --prefer-dist
           "
           
-          # Verify files
+          # Set additional proper permissions for specific file types
           ssh -i private_key.pem $EC2_USER@$EC2_HOST "
-            echo 'Uploaded files to /var/www:' &&
+            echo 'Setting secure file permissions...' &&
+            
+            # Make sure files are not executable but are readable
+            sudo find /var/www -type f -exec chmod 640 {} \;             # rw-r----- (owner can read/write, group can read)
+            sudo find /var/www/public -type f -exec chmod 644 {} \;      # rw-r--r-- (owner can read/write, group and others can read)
+            
+            # Script files should be executable for the owner and group
+            sudo find /var/www -name '*.sh' -exec chmod 750 {} \;        # rwxr-x--- (owner can read/write/execute, group can read/execute)
+            
+            # Ensure public directory is accessible
+            sudo chmod 755 /var/www/public                               # rwxr-xr-x
+            
+            # Verify file permissions
+            echo 'Verifying file permissions:' &&
             ls -la /var/www/ &&
-            echo 'Installed vendor dependencies:' &&
-            ls -la /var/www/vendor/
+            ls -la /var/www/public/
           "
           
           # Clear PHP caches and restart services
