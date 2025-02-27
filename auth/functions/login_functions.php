@@ -48,9 +48,9 @@ function authenticate_user($email, $password) {
     
     if ($verify_result['valid']) {
         error_log("Password verification successful");
-        // If it's bcrypt or needs rehash, upgrade to Argon2id
+        // Check if the password hash needs to be updated (e.g., if cost factor changed)
         if ($verify_result['needs_upgrade']) {
-            error_log("Password needs upgrade, generating new Argon2id hash");
+            error_log("Password hash needs upgrade, generating new Bcrypt hash");
             $new_hash = hash_password($password);
             error_log("New hash generated: " . substr($new_hash, 0, 20) . "...");
             

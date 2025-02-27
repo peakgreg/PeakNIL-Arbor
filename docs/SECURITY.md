@@ -4,7 +4,7 @@
 
 ### Critical Priority
 - [ ] 1. Implement Password Security
-  - [x] Add password hashing using PASSWORD_ARGON2ID
+  - [x] Add password hashing using PASSWORD_BCRYPT
   - [x] Implement password complexity requirements
         Minimum length: 8 characters
         Must contain at least one uppercase letter
@@ -104,7 +104,7 @@
 ### Password Security Implementation
 ```php
 // Use password_hash with strong algorithm
-$hash = password_hash($password, PASSWORD_ARGON2ID);
+$hash = password_hash($password, PASSWORD_BCRYPT, ['cost' => 12]);
 
 // Implement password complexity validation
 function validate_password_strength($password) {

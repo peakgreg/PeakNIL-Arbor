@@ -2,8 +2,8 @@
 echo "Available password algorithms: ";
 print_r(password_algos());
 
-if (defined('PASSWORD_ARGON2ID')) {
-    echo "\nArgon2id is supported!";
+if (defined('PASSWORD_BCRYPT')) {
+    echo "\nBcrypt is supported!";
 }
 ?>
 
