@@ -35,8 +35,28 @@ jobs:
           -e "ssh -o StrictHostKeyChecking=no -i private_key.pem" \
           ./ ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:/var/www/ || [ $? -eq 23 ]
           
-          # Run Composer install on the EC2 server
-          ssh -o StrictHostKeyChecking=no -i private_key.pem ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "cd /var/www/ && composer install --no-dev --optimize-autoloader"
+          # Run Composer install only if composer.json or composer.lock has changed
+          ssh -o StrictHostKeyChecking=no -i private_key.pem ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "cd /var/www/ && 
+          if [ -f 'composer.json.md5' ] && [ -f 'composer.lock.md5' ]; then
+            OLD_JSON_MD5=\$(cat composer.json.md5)
+            OLD_LOCK_MD5=\$(cat composer.lock.md5)
+            NEW_JSON_MD5=\$(md5sum composer.json | awk '{print \$1}')
+            NEW_LOCK_MD5=\$(md5sum composer.lock | awk '{print \$1}')
+            
+            if [ \"\$OLD_JSON_MD5\" != \"\$NEW_JSON_MD5\" ] || [ \"\$OLD_LOCK_MD5\" != \"\$NEW_LOCK_MD5\" ]; then
+              echo 'Composer files changed. Installing dependencies...'
+              composer install --no-dev --optimize-autoloader
+              md5sum composer.json | awk '{print \$1}' > composer.json.md5
+              md5sum composer.lock | awk '{print \$1}' > composer.lock.md5
+            else
+              echo 'No changes to composer files. Skipping installation.'
+            fi
+          else
+            echo 'First deployment or MD5 files missing. Installing dependencies...'
+            composer install --no-dev --optimize-autoloader
+            md5sum composer.json | awk '{print \$1}' > composer.json.md5
+            md5sum composer.lock | awk '{print \$1}' > composer.lock.md5
+          fi"
           
           # Optional: Clear Composer cache to save space
           ssh -o StrictHostKeyChecking=no -i private_key.pem ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "composer clear-cache"
