@@ -1,176 +1,61 @@
-# EC2 Deployment Workflow
-#
-# Overview:
-# This workflow automates deployment of a web application to an Amazon EC2 instance,
-# using a temporary directory approach to handle permission issues.
-#
-# Trigger: Push to main branch
-# Environment: Ubuntu Latest
-#
-name: EC2 Deployment
+name: Deploy to EC2
 on:
   push:
     branches:
-      - main
+      - main  # Trigger deployment on pushes to the main branch
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-      - name: Create SSH key
+      - name: Checkout Code
+        uses: actions/checkout@v3  # Check out the code from the repository
+
+      - name: Deploy to EC2
         env:
           EC2_PRIVATE_KEY: ${{ secrets.EC2_PRIVATE_KEY }}
         run: |
+          # Create the private key file from the secret
           echo "$EC2_PRIVATE_KEY" > private_key.pem
           chmod 600 private_key.pem
-      - name: Deploy to EC2
-        env:
-          EC2_USER: ${{ secrets.EC2_USER }}
-          EC2_HOST: ${{ secrets.EC2_HOST }}
-        run: |
-          # Test connection
-          ssh -o StrictHostKeyChecking=no -i private_key.pem $EC2_USER@$EC2_HOST "echo 'Connection successful!'"
           
-          # Create a temporary directory in the user's home directory
-          echo "Creating temporary directory for deployment..."
-          ssh -i private_key.pem $EC2_USER@$EC2_HOST "mkdir -p ~/temp_deploy"
+          # Use rsync to deploy the code to EC2
+          rsync -avz --delete --omit-dir-times --no-perms --no-owner --no-group \
+          --exclude='.git/' \
+          --exclude='.github/' \
+          --exclude='.docs/' \
+          --exclude='private_key.pem' \
+          --exclude='test.php' \
+          --exclude='.env.example' \
+          --exclude='.gitattributes' \
+          --exclude='.gitignore' \
+          --exclude='.DS_Store' \
+          -e "ssh -o StrictHostKeyChecking=no -i private_key.pem" \
+          ./ ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:/var/www/html/ || [ $? -eq 23 ]
           
-          # Upload all files to the temporary directory
-          echo "Uploading repository contents to temporary directory..."
-          rsync -av \
-            --exclude='.git*' \
-            --exclude='.gitattributes' \
-            --exclude='.gitignore' \
-            --exclude='private_key.pem' \
-            --exclude='docs' \
-            --exclude='.github' \
-            --exclude='database' \
-            --exclude='.clinerules' \
-            -e "ssh -i private_key.pem" \
-            ./ $EC2_USER@$EC2_HOST:~/temp_deploy/
+          # Run Composer install on the EC2 server
+          ssh -o StrictHostKeyChecking=no -i private_key.pem ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "cd /var/www/html/ && composer install --no-dev --optimize-autoloader"
           
-          # Use sudo to deploy from temporary directory to correct locations
-          echo "Deploying from temporary directory to EC2..."
-          ssh -i private_key.pem $EC2_USER@$EC2_HOST "
-            # Get the Apache web server user (could be www-data, apache, etc.)
-            WEB_USER=\$(ps aux | grep -E '(apache|httpd|apache2)' | grep -v 'grep' | head -1 | awk '{print \$1}')
-            if [ -z \"\$WEB_USER\" ]; then
-              # Default to www-data if we couldn't detect it
-              WEB_USER='www-data'
-              echo 'Could not detect web server user, defaulting to www-data'
-            else
-              echo \"Detected web server user: \$WEB_USER\"
-            fi
-            
-            # IMPORTANT: Deploy html directory to default Apache document root
-            # This fixes the 'Forbidden' error by placing content where Apache expects it
-            echo 'Deploying HTML directory to default Apache document root...'
-            sudo mkdir -p /var/www/html
-            if [ -d ~/temp_deploy/html ]; then
-              sudo cp -r ~/temp_deploy/html/* /var/www/html/
-            fi
-            
-            # Also copy any public directory content to html if it exists
-            if [ -d ~/temp_deploy/public ]; then
-              sudo cp -r ~/temp_deploy/public/* /var/www/html/
-            fi
-            
-            # Set proper permissions for html directory
-            sudo chown -R $EC2_USER /var/www/html
-            sudo chgrp -R \$WEB_USER /var/www/html
-            sudo chmod -R 755 /var/www/html
-            sudo find /var/www/html -type f -exec chmod 644 {} \;
-            
-            # Deploy rest of application code to /var/www
-            echo 'Deploying application code to /var/www...'
-            for item in ~/temp_deploy/*; do
-              if [[ \"\$item\" != *\"/html\"* && \"\$item\" != *\"/public\"* ]]; then
-                sudo cp -r \$item /var/www/
-              fi
-            done
-            
-            # Set proper permissions for application code
-            sudo chown -R $EC2_USER /var/www
-            sudo chgrp -R \$WEB_USER /var/www
-            sudo find /var/www -path /var/www/html -prune -o -type d -exec chmod 750 {} \;
-            sudo find /var/www -path /var/www/html -prune -o -type f -exec chmod 640 {} \;
-            
-            # Make scripts executable
-            sudo find /var/www -name '*.sh' -exec chmod 750 {} \;
-            
-            # Clean up temporary directory
-            rm -rf ~/temp_deploy
-            
-            # Verify deployment
-            echo 'Deployment files in /var/www/html (web root):'
-            ls -la /var/www/html/
-            echo 'Deployment files in /var/www (application code):'
-            ls -la /var/www/
-          "
+          # Optional: Clear Composer cache to save space
+          ssh -o StrictHostKeyChecking=no -i private_key.pem ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "composer clear-cache"
           
-          # Check for Composer and install if needed, then run Composer install
-          echo "Installing Composer dependencies..."
-          ssh -i private_key.pem $EC2_USER@$EC2_HOST "
-            # Check if Composer is installed
-            if ! command -v composer &> /dev/null; then
-              echo 'Composer not found, installing...'
-              # Create directory for Composer
-              mkdir -p ~/.composer
-              
-              # Download Composer installer
-              curl -sS https://getcomposer.org/installer -o composer-setup.php
-              
-              # Install Composer globally
-              sudo php composer-setup.php --install-dir=/usr/local/bin --filename=composer
-              
-              # Clean up installer
-              rm composer-setup.php
-              
-              echo 'Composer installed successfully!'
-            else
-              echo 'Composer is already installed'
-            fi
-            
-            # Install dependencies
-            cd /var/www &&
-            composer install \
-              --no-dev \
-              --classmap-authoritative \
-              --no-interaction \
-              --prefer-dist
-          "
+          # **Delete composer.json and composer.lock from the production server**
+          ssh -o StrictHostKeyChecking=no -i private_key.pem ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "rm -f /var/www/html/composer.json /var/www/html/composer.lock"
           
-          # Clear PHP caches and restart services
-          echo "Clearing caches and restarting services..."
-          ssh -i private_key.pem $EC2_USER@$EC2_HOST "
-            # Clear OPcache if enabled
-            if php -r 'echo (int)function_exists(\"opcache_reset\");'; then
-              php -r 'opcache_reset();'
-              echo 'OPcache cleared successfully!'
-            fi
-            
-            # Clear APCu cache if installed
-            if php -r 'echo (int)function_exists(\"apcu_clear_cache\");'; then
-              php -r 'apcu_clear_cache();'
-              echo 'APCu cache cleared successfully!'
-            fi
-            
-            # Restart PHP services
-            sudo systemctl restart php*-fpm 2>/dev/null || echo 'No PHP-FPM service found'
-            sudo service php* restart 2>/dev/null || echo 'No PHP service found'
-            
-            # Restart Apache
-            sudo systemctl restart apache2 2>/dev/null || sudo service apache2 restart 2>/dev/null || echo 'Apache restart attempted'
-            
-            # Touch PHP files to refresh file cache
-            sudo find /var/www -name '*.php' -exec touch {} \;
-            echo 'PHP files touched to refresh file cache'
-          "
-          
-          echo "Deployment completed successfully!"
+          # Clean up private key on EC2 server
+          ssh -o StrictHostKeyChecking=no -i private_key.pem ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "rm -f /var/www/html/private_key.pem"
+
       - name: Cleanup
-        if: always()
+        if: always()  # This ensures the step runs even if previous steps fail
         run: |
+          # Print working directory and list files
+          pwd
+          ls -la
+          
+          # Try multiple cleanup methods
           rm -f private_key.pem
-          echo "Cleanup completed"
+          find . -name "private_key.pem" -exec rm -f {} \;
+          find /home/runner/work -name "private_key.pem" -exec rm -f {} \;
+          
+          # Verify deletion
+          ls -la private_key.pem || echo "File not found - successfully deleted"

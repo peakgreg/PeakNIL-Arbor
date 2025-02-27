@@ -1,0 +1,176 @@
+# EC2 Deployment Workflow
+#
+# Overview:
+# This workflow automates deployment of a web application to an Amazon EC2 instance,
+# using a temporary directory approach to handle permission issues.
+#
+# Trigger: Push to main branch
+# Environment: Ubuntu Latest
+#
+name: EC2 Deployment
+on:
+  push:
+    branches:
+      - main
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      - name: Create SSH key
+        env:
+          EC2_PRIVATE_KEY: ${{ secrets.EC2_PRIVATE_KEY }}
+        run: |
+          echo "$EC2_PRIVATE_KEY" > private_key.pem
+          chmod 600 private_key.pem
+      - name: Deploy to EC2
+        env:
+          EC2_USER: ${{ secrets.EC2_USER }}
+          EC2_HOST: ${{ secrets.EC2_HOST }}
+        run: |
+          # Test connection
+          ssh -o StrictHostKeyChecking=no -i private_key.pem $EC2_USER@$EC2_HOST "echo 'Connection successful!'"
+          
+          # Create a temporary directory in the user's home directory
+          echo "Creating temporary directory for deployment..."
+          ssh -i private_key.pem $EC2_USER@$EC2_HOST "mkdir -p ~/temp_deploy"
+          
+          # Upload all files to the temporary directory
+          echo "Uploading repository contents to temporary directory..."
+          rsync -av \
+            --exclude='.git*' \
+            --exclude='.gitattributes' \
+            --exclude='.gitignore' \
+            --exclude='private_key.pem' \
+            --exclude='docs' \
+            --exclude='.github' \
+            --exclude='database' \
+            --exclude='.clinerules' \
+            -e "ssh -i private_key.pem" \
+            ./ $EC2_USER@$EC2_HOST:~/temp_deploy/
+          
+          # Use sudo to deploy from temporary directory to correct locations
+          echo "Deploying from temporary directory to EC2..."
+          ssh -i private_key.pem $EC2_USER@$EC2_HOST "
+            # Get the Apache web server user (could be www-data, apache, etc.)
+            WEB_USER=\$(ps aux | grep -E '(apache|httpd|apache2)' | grep -v 'grep' | head -1 | awk '{print \$1}')
+            if [ -z \"\$WEB_USER\" ]; then
+              # Default to www-data if we couldn't detect it
+              WEB_USER='www-data'
+              echo 'Could not detect web server user, defaulting to www-data'
+            else
+              echo \"Detected web server user: \$WEB_USER\"
+            fi
+            
+            # IMPORTANT: Deploy html directory to default Apache document root
+            # This fixes the 'Forbidden' error by placing content where Apache expects it
+            echo 'Deploying HTML directory to default Apache document root...'
+            sudo mkdir -p /var/www/html
+            if [ -d ~/temp_deploy/html ]; then
+              sudo cp -r ~/temp_deploy/html/* /var/www/html/
+            fi
+            
+            # Also copy any public directory content to html if it exists
+            if [ -d ~/temp_deploy/public ]; then
+              sudo cp -r ~/temp_deploy/public/* /var/www/html/
+            fi
+            
+            # Set proper permissions for html directory
+            sudo chown -R $EC2_USER /var/www/html
+            sudo chgrp -R \$WEB_USER /var/www/html
+            sudo chmod -R 755 /var/www/html
+            sudo find /var/www/html -type f -exec chmod 644 {} \;
+            
+            # Deploy rest of application code to /var/www
+            echo 'Deploying application code to /var/www...'
+            for item in ~/temp_deploy/*; do
+              if [[ \"\$item\" != *\"/html\"* && \"\$item\" != *\"/public\"* ]]; then
+                sudo cp -r \$item /var/www/
+              fi
+            done
+            
+            # Set proper permissions for application code
+            sudo chown -R $EC2_USER /var/www
+            sudo chgrp -R \$WEB_USER /var/www
+            sudo find /var/www -path /var/www/html -prune -o -type d -exec chmod 750 {} \;
+            sudo find /var/www -path /var/www/html -prune -o -type f -exec chmod 640 {} \;
+            
+            # Make scripts executable
+            sudo find /var/www -name '*.sh' -exec chmod 750 {} \;
+            
+            # Clean up temporary directory
+            rm -rf ~/temp_deploy
+            
+            # Verify deployment
+            echo 'Deployment files in /var/www/html (web root):'
+            ls -la /var/www/html/
+            echo 'Deployment files in /var/www (application code):'
+            ls -la /var/www/
+          "
+          
+          # Check for Composer and install if needed, then run Composer install
+          echo "Installing Composer dependencies..."
+          ssh -i private_key.pem $EC2_USER@$EC2_HOST "
+            # Check if Composer is installed
+            if ! command -v composer &> /dev/null; then
+              echo 'Composer not found, installing...'
+              # Create directory for Composer
+              mkdir -p ~/.composer
+              
+              # Download Composer installer
+              curl -sS https://getcomposer.org/installer -o composer-setup.php
+              
+              # Install Composer globally
+              sudo php composer-setup.php --install-dir=/usr/local/bin --filename=composer
+              
+              # Clean up installer
+              rm composer-setup.php
+              
+              echo 'Composer installed successfully!'
+            else
+              echo 'Composer is already installed'
+            fi
+            
+            # Install dependencies
+            cd /var/www &&
+            composer install \
+              --no-dev \
+              --classmap-authoritative \
+              --no-interaction \
+              --prefer-dist
+          "
+          
+          # Clear PHP caches and restart services
+          echo "Clearing caches and restarting services..."
+          ssh -i private_key.pem $EC2_USER@$EC2_HOST "
+            # Clear OPcache if enabled
+            if php -r 'echo (int)function_exists(\"opcache_reset\");'; then
+              php -r 'opcache_reset();'
+              echo 'OPcache cleared successfully!'
+            fi
+            
+            # Clear APCu cache if installed
+            if php -r 'echo (int)function_exists(\"apcu_clear_cache\");'; then
+              php -r 'apcu_clear_cache();'
+              echo 'APCu cache cleared successfully!'
+            fi
+            
+            # Restart PHP services
+            sudo systemctl restart php*-fpm 2>/dev/null || echo 'No PHP-FPM service found'
+            sudo service php* restart 2>/dev/null || echo 'No PHP service found'
+            
+            # Restart Apache
+            sudo systemctl restart apache2 2>/dev/null || sudo service apache2 restart 2>/dev/null || echo 'Apache restart attempted'
+            
+            # Touch PHP files to refresh file cache
+            sudo find /var/www -name '*.php' -exec touch {} \;
+            echo 'PHP files touched to refresh file cache'
+          "
+          
+          echo "Deployment completed successfully!"
+      - name: Cleanup
+        if: always()
+        run: |
+          rm -f private_key.pem
+          echo "Cleanup completed"
