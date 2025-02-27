@@ -1,1 +1,0 @@
-<?php echo 'Direct access to test.php works!'; ?>
