@@ -23,6 +23,5 @@ ssh -i "/Users/gregoryjackson/Desktop/peakprod.pem" ec2-user@ec2-3-145-193-251.u
 # Create File
 nano fix-apache.sh
 
-
-drwxr-xr-x 5 apache   apache   103 Feb 24 20:08 /var/www/html
-drwxr-xr-x  4 ec2-user ec2-user 193 Feb 27 04:14 /var/www/public
+# Display Errors
+sudo tail -f /var/log/httpd/error_log

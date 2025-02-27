@@ -20,11 +20,11 @@
 #
 # 4. Directory Preparation
 #    - Creates and sets ownership for:
-#      - /var/www/html (public web root)
+#      - /var/www/public (public web root)
 #      - /var/www (protected application code)
 #
 # 5. File Deployment - Split Structure
-#    - Public Content: Copies /public directory to /var/www/html/
+#    - Public Content: Copies /public directory to /var/www/public/
 #    - Application Code: Copies other files to /var/www/
 #    - Excluded Files/Directories:
 #      - .git* files and directories
@@ -86,15 +86,15 @@ jobs:
           
           # Ensure both directories exist and set permissions
           ssh -i private_key.pem $EC2_USER@$EC2_HOST "
-            sudo mkdir -p /var/www/html &&
+            sudo mkdir -p /var/www/public &&
             sudo mkdir -p /var/www &&
-            sudo chown -R $EC2_USER:$EC2_USER /var/www/html &&
+            sudo chown -R $EC2_USER:$EC2_USER /var/www/public &&
             sudo chown -R $EC2_USER:$EC2_USER /var/www
           "
           
-          # Copy public directory contents to /var/www/html
-          echo "Uploading /public contents to /var/www/html..."
-          rsync -av --exclude='.git*' --exclude='private_key.pem' -e "ssh -i private_key.pem" ./public/ $EC2_USER@$EC2_HOST:/var/www/html/
+          # Copy public directory contents to /var/www/public
+          echo "Uploading /public contents to /var/www/public..."
+          rsync -av --exclude='.git*' --exclude='private_key.pem' -e "ssh -i private_key.pem" ./public/ $EC2_USER@$EC2_HOST:/var/www/public/
           
           # Copy everything else (excluding public directory) to /var/www
           echo "Uploading non-public files to /var/www..."
@@ -146,15 +146,15 @@ jobs:
           
           # Set proper permissions and verify files
           ssh -i private_key.pem $EC2_USER@$EC2_HOST "
-            echo 'Uploaded files to /var/www/html:' &&
-            ls -la /var/www/html/ &&
+            echo 'Uploaded files to /var/www/public:' &&
+            ls -la /var/www/public/ &&
             echo 'Uploaded files to /var/www:' &&
             ls -la /var/www/ &&
             echo 'Installed vendor dependencies:' &&
             ls -la /var/www/vendor/ &&
-            sudo chmod -R 755 /var/www/html/ &&
+            sudo chmod -R 755 /var/www/public/ &&
             sudo chmod -R 755 /var/www/ &&
-            sudo find /var/www/html/ -type f -exec chmod 644 {} \; &&
+            sudo find /var/www/public/ -type f -exec chmod 644 {} \; &&
             sudo find /var/www/ -type f -exec chmod 644 {} \;
           "
           
@@ -181,7 +181,7 @@ jobs:
             echo 'Restarting Apache...' &&
             sudo systemctl restart apache2 2>/dev/null || sudo service apache2 restart 2>/dev/null || echo 'Apache restart attempted' &&
             # Clear PHP file cache by touching files if needed
-            find /var/www/html -name '*.php' -exec touch {} \; &&
+            find /var/www/public -name '*.php' -exec touch {} \; &&
             find /var/www -name '*.php' -exec touch {} \; &&
             echo 'PHP files touched to refresh file cache' &&
             echo 'PHP cache clearing and service restarts completed!'
