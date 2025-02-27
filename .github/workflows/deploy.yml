@@ -99,6 +99,7 @@ jobs:
           # Copy everything else (excluding public directory) to /var/www
           echo "Uploading non-public files to /var/www..."
           rsync -av \
+            --exclude='.env' \
             --exclude='.git*' \
             --exclude='.gitattributes' \
             --exclude='.gitignore' \
