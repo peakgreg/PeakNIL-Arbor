@@ -1,14 +1,13 @@
-# Basic .htaccess file
-Options -Indexes
-RewriteEngine On
+# Enable URL rewriting
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
 
-# Set the main index file
-DirectoryIndex index.php
-
-# Handle front controller pattern if needed
-# RewriteCond %{REQUEST_FILENAME} !-f
-# RewriteCond %{REQUEST_FILENAME} !-d
-# RewriteRule ^(.*)$ index.php [QSA,L]
+  # Route requests to index.php if the requested resource does not exist
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteRule ^ index.php [L]
+</IfModule>
 
 # Deny access to hidden files such as .git and .htaccess itself
 <FilesMatch "^\.(ht|git)">
