@@ -1,99 +1,194 @@
-name: Deploy to EC2
+# EC2 Deployment Workflow
+#
+# Overview:
+# This workflow automates deployment of a web application to an Amazon EC2 instance,
+# separating public content from application code for improved security.
+#
+# Trigger: Push to main branch
+# Environment: Ubuntu Latest
+#
+# Detailed Process:
+# 1. Repository Checkout
+#    - Fetches repository code using actions/checkout@v2
+#
+# 2. SSH Key Creation
+#    - Creates private key file from EC2_PRIVATE_KEY secret
+#    - Sets 600 permissions for SSH usage
+#
+# 3. Connection Testing
+#    - Verifies connectivity to EC2 instance
+#
+# 4. Directory Preparation
+#    - Creates and sets ownership for:
+#      - /var/www/html (public web root)
+#      - /var/www (protected application code)
+#
+# 5. File Deployment - Split Structure
+#    - Public Content: Copies /public directory to /var/www/html/
+#    - Application Code: Copies other files to /var/www/
+#    - Excluded Files/Directories:
+#      - .git* files and directories
+#      - .github directory
+#      - /database directory
+#      - .clinerules
+#      - .gitattributes and .gitignore
+#
+# 6. Composer Dependencies Installation
+#    - Runs composer install in production mode
+#    - Installs packages to /var/www/vendor
+#
+# 7. Permission Management
+#    - Sets 755 for directories (rwxr-xr-x)
+#    - Sets 644 for files (rw-r--r--)
+#
+# 8. PHP Cache Clearing
+#    - Clears OPcache and APCu if available
+#
+# 9. Service Restart
+#    - Restarts PHP services (PHP-FPM or PHP)
+#    - Restarts Apache web server
+#
+# 10. File Cache Refresh
+#    - Touches all PHP files to refresh file-based caches
+#
+# 11. Cleanup
+#    - Removes temporary private key file
+#
+# Required Secrets:
+# - EC2_PRIVATE_KEY: SSH private key for EC2 access
+# - EC2_USER: Username for EC2 connection
+# - EC2_HOST: Hostname or IP address of EC2 instance
+#
+name: EC2 Deployment
 on:
   push:
     branches:
-      - main  # Trigger deployment on pushes to the main branch
+      - main
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3  # Check out the code from the repository
-      
-      - name: Deploy to EC2
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      - name: Create SSH key
         env:
           EC2_PRIVATE_KEY: ${{ secrets.EC2_PRIVATE_KEY }}
         run: |
-          # Create the private key file from the secret
           echo "$EC2_PRIVATE_KEY" > private_key.pem
           chmod 600 private_key.pem
-          
-          # Ensure the correct directory structure exists with proper ownership
-          ssh -o StrictHostKeyChecking=no -i private_key.pem ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "sudo mkdir -p /var/www/public && sudo chown ec2-user:ec2-user /var/www && sudo chown apache:apache /var/www/public"
-          
-          # Use rsync to deploy the code to EC2
-          rsync -avz --delete --omit-dir-times --no-perms --no-owner --no-group \
-          --exclude='.git/' \
-          --exclude='.github/' \
-          --exclude='.docs/' \
-          --exclude='private_key.pem' \
-          --exclude='test.php' \
-          --exclude='.env.example' \
-          --exclude='.gitattributes' \
-          --exclude='.gitignore' \
-          --exclude='.DS_Store' \
-          -e "ssh -o StrictHostKeyChecking=no -i private_key.pem" \
-          ./ ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:/var/www/ || [ $? -eq 23 ]
-          
-          # Run Composer install only if composer.json or composer.lock has changed
-          ssh -o StrictHostKeyChecking=no -i private_key.pem ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "cd /var/www/ && 
-          if [ -f 'composer.json.md5' ] && [ -f 'composer.lock.md5' ]; then
-            OLD_JSON_MD5=\$(cat composer.json.md5)
-            OLD_LOCK_MD5=\$(cat composer.lock.md5)
-            NEW_JSON_MD5=\$(md5sum composer.json | awk '{print \$1}')
-            NEW_LOCK_MD5=\$(md5sum composer.lock | awk '{print \$1}')
-            
-            if [ \"\$OLD_JSON_MD5\" != \"\$NEW_JSON_MD5\" ] || [ \"\$OLD_LOCK_MD5\" != \"\$NEW_LOCK_MD5\" ]; then
-              echo 'Composer files changed. Installing dependencies...'
-              composer install --no-dev --optimize-autoloader
-              md5sum composer.json | awk '{print \$1}' > composer.json.md5
-              md5sum composer.lock | awk '{print \$1}' > composer.lock.md5
-            else
-              echo 'No changes to composer files. Skipping installation.'
-            fi
-          else
-            echo 'First deployment or MD5 files missing. Installing dependencies...'
-            composer install --no-dev --optimize-autoloader
-            md5sum composer.json | awk '{print \$1}' > composer.json.md5
-            md5sum composer.lock | awk '{print \$1}' > composer.lock.md5
-          fi"
-          
-          # Optional: Clear Composer cache to save space
-          ssh -o StrictHostKeyChecking=no -i private_key.pem ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "composer clear-cache"
-          
-          # Delete composer.json and composer.lock from the production server
-          ssh -o StrictHostKeyChecking=no -i private_key.pem ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "rm -f /var/www/composer.json /var/www/composer.lock"
-          
-          # Keep ownership as ec2-user for main directory, but set apache for public
-          ssh -o StrictHostKeyChecking=no -i private_key.pem ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "sudo chown -R ec2-user:ec2-user /var/www && sudo chown -R apache:apache /var/www/public"
-          
-          # Clean up private key on EC2 server
-          ssh -o StrictHostKeyChecking=no -i private_key.pem ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "rm -f /var/www/private_key.pem"
-          
-          # Verify directory structure and permissions
-          ssh -o StrictHostKeyChecking=no -i private_key.pem ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "ls -ld /var/www /var/www/public"
-          
-          # 2. Check Apache configuration for AllowOverride settings
-          echo "Checking Apache AllowOverride settings..."
-          ssh -o StrictHostKeyChecking=no -i private_key.pem ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "sudo grep -r 'AllowOverride' /etc/httpd/conf/ /etc/httpd/conf.d/"
-          
-          # 4. Check PHP error log
-          echo "Checking PHP error log..."
-          ssh -o StrictHostKeyChecking=no -i private_key.pem ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "sudo tail -n 50 /var/log/php-fpm/error.log || sudo tail -n 50 /var/log/php/error.log || echo 'PHP error log not found in standard locations'"
-          
-          # 5. Check Apache error log
-          echo "Checking Apache error log..."
-          ssh -o StrictHostKeyChecking=no -i private_key.pem ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "sudo tail -n 50 /var/log/httpd/error_log || sudo tail -n 50 /var/log/apache2/error.log || echo 'Apache error log not found in standard locations'"
-      
-      - name: Cleanup
-        if: always()  # This ensures the step runs even if previous steps fail
+      - name: Deploy to EC2
+        env:
+          EC2_USER: ${{ secrets.EC2_USER }}
+          EC2_HOST: ${{ secrets.EC2_HOST }}
         run: |
-          # Print working directory and list files
-          pwd
-          ls -la
-          # Try multiple cleanup methods
+          # Test connection
+          ssh -o StrictHostKeyChecking=no -i private_key.pem $EC2_USER@$EC2_HOST "echo 'Connection successful!'"
+          
+          # Ensure both directories exist and set permissions
+          ssh -i private_key.pem $EC2_USER@$EC2_HOST "
+            sudo mkdir -p /var/www/html &&
+            sudo mkdir -p /var/www &&
+            sudo chown -R $EC2_USER:$EC2_USER /var/www/html &&
+            sudo chown -R $EC2_USER:$EC2_USER /var/www
+          "
+          
+          # Copy public directory contents to /var/www/html
+          echo "Uploading /public contents to /var/www/html..."
+          rsync -av --exclude='.git*' --exclude='private_key.pem' -e "ssh -i private_key.pem" ./public/ $EC2_USER@$EC2_HOST:/var/www/html/
+          
+          # Copy everything else (excluding public directory) to /var/www
+          echo "Uploading non-public files to /var/www..."
+          rsync -av \
+            --exclude='.git*' \
+            --exclude='.gitattributes' \
+            --exclude='.gitignore' \
+            --exclude='private_key.pem' \
+            --exclude='./public' \
+            --exclude='docs' \
+            --exclude='.github' \
+            --exclude='database' \
+            --exclude='.clinerules' \
+            -e "ssh -i private_key.pem" \
+            ./ $EC2_USER@$EC2_HOST:/var/www/
+          
+          # Check for Composer and install if needed, then run Composer install
+          echo "Checking for Composer and installing dependencies..."
+          ssh -i private_key.pem $EC2_USER@$EC2_HOST "
+            # Check if Composer is installed
+            if ! command -v composer &> /dev/null; then
+              echo 'Composer not found, installing...'
+              # Create directory for Composer
+              mkdir -p ~/.composer
+              
+              # Download Composer installer
+              curl -sS https://getcomposer.org/installer -o composer-setup.php
+              
+              # Install Composer globally
+              sudo php composer-setup.php --install-dir=/usr/local/bin --filename=composer
+              
+              # Clean up installer
+              rm composer-setup.php
+              
+              echo 'Composer installed successfully!'
+            else
+              echo 'Composer is already installed'
+            fi
+            
+            # Install dependencies
+            cd /var/www &&
+            composer install \
+              --no-dev \
+              --classmap-authoritative \
+              --no-interaction \
+              --prefer-dist
+          "
+          
+          # Set proper permissions and verify files
+          ssh -i private_key.pem $EC2_USER@$EC2_HOST "
+            echo 'Uploaded files to /var/www/html:' &&
+            ls -la /var/www/html/ &&
+            echo 'Uploaded files to /var/www:' &&
+            ls -la /var/www/ &&
+            echo 'Installed vendor dependencies:' &&
+            ls -la /var/www/vendor/ &&
+            sudo chmod -R 755 /var/www/html/ &&
+            sudo chmod -R 755 /var/www/ &&
+            sudo find /var/www/html/ -type f -exec chmod 644 {} \; &&
+            sudo find /var/www/ -type f -exec chmod 644 {} \;
+          "
+          
+          # Clear PHP caches and restart services
+          ssh -i private_key.pem $EC2_USER@$EC2_HOST "
+            echo 'Clearing PHP caches and restarting services...' &&
+            # Clear OPcache if enabled
+            if php -r 'echo (int)function_exists(\"opcache_reset\");'; then
+              php -r 'opcache_reset();'
+              echo 'OPcache cleared successfully!'
+            fi &&
+            # Clear APCu cache if installed
+            if php -r 'echo (int)function_exists(\"apcu_clear_cache\");'; then
+              php -r 'apcu_clear_cache();'
+              echo 'APCu cache cleared successfully!'
+            fi &&
+            # Force restart PHP services regardless of current status
+            echo 'Restarting PHP services...' &&
+            # Try PHP-FPM restart (common in modern setups)
+            sudo systemctl restart php*-fpm 2>/dev/null || echo 'No PHP-FPM service found' &&
+            # Try PHP service restart (for systems using traditional PHP module)
+            sudo service php* restart 2>/dev/null || echo 'No PHP service found' &&
+            # Force restart Apache regardless of current status
+            echo 'Restarting Apache...' &&
+            sudo systemctl restart apache2 2>/dev/null || sudo service apache2 restart 2>/dev/null || echo 'Apache restart attempted' &&
+            # Clear PHP file cache by touching files if needed
+            find /var/www/html -name '*.php' -exec touch {} \; &&
+            find /var/www -name '*.php' -exec touch {} \; &&
+            echo 'PHP files touched to refresh file cache' &&
+            echo 'PHP cache clearing and service restarts completed!'
+          "
+          
+          echo "Deployment completed successfully!"
+      - name: Cleanup
+        if: always()
+        run: |
           rm -f private_key.pem
-          find . -name "private_key.pem" -exec rm -f {} \;
-          find /home/runner/work -name "private_key.pem" -exec rm -f {} \;
-          # Verify deletion
-          ls -la private_key.pem || echo "File not found - successfully deleted"
+          echo "Cleanup completed"
