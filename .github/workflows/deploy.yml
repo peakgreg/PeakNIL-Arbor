@@ -52,6 +52,22 @@ jobs:
           
           # Verify directory structure and permissions
           ssh -o StrictHostKeyChecking=no -i private_key.pem ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "ls -ld /var/www /var/www/public"
+          
+          # 2. Check Apache configuration for AllowOverride settings
+          echo "Checking Apache AllowOverride settings..."
+          ssh -o StrictHostKeyChecking=no -i private_key.pem ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "sudo grep -r 'AllowOverride' /etc/httpd/conf/ /etc/httpd/conf.d/"
+          
+          # 3. Create a simple test.php file to verify PHP is working
+          echo "Creating test.php file..."
+          ssh -o StrictHostKeyChecking=no -i private_key.pem ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "echo '<?php phpinfo(); ?>' > /var/www/public/test.php && sudo chown apache:apache /var/www/public/test.php && sudo chmod 644 /var/www/public/test.php"
+          
+          # 4. Check PHP error log
+          echo "Checking PHP error log..."
+          ssh -o StrictHostKeyChecking=no -i private_key.pem ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "sudo tail -n 50 /var/log/php-fpm/error.log || sudo tail -n 50 /var/log/php/error.log || echo 'PHP error log not found in standard locations'"
+          
+          # 5. Check Apache error log
+          echo "Checking Apache error log..."
+          ssh -o StrictHostKeyChecking=no -i private_key.pem ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "sudo tail -n 50 /var/log/httpd/error_log || sudo tail -n 50 /var/log/apache2/error.log || echo 'Apache error log not found in standard locations'"
       
       - name: Cleanup
         if: always()  # This ensures the step runs even if previous steps fail
