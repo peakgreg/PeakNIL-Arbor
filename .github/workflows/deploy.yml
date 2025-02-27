@@ -50,8 +50,8 @@ jobs:
             -e "ssh -i private_key.pem" \
             ./ $EC2_USER@$EC2_HOST:~/temp_deploy/
           
-          # Use sudo to deploy from temporary directory to /var/www
-          echo "Deploying from temporary directory to /var/www..."
+          # Use sudo to deploy from temporary directory to correct locations
+          echo "Deploying from temporary directory to EC2..."
           ssh -i private_key.pem $EC2_USER@$EC2_HOST "
             # Get the Apache web server user (could be www-data, apache, etc.)
             WEB_USER=\$(ps aux | grep -E '(apache|httpd|apache2)' | grep -v 'grep' | head -1 | awk '{print \$1}')
@@ -63,24 +63,38 @@ jobs:
               echo \"Detected web server user: \$WEB_USER\"
             fi
             
-            # Ensure the /var/www directory exists
-            sudo mkdir -p /var/www
-            sudo mkdir -p /var/www/public
+            # IMPORTANT: Deploy html directory to default Apache document root
+            # This fixes the 'Forbidden' error by placing content where Apache expects it
+            echo 'Deploying HTML directory to default Apache document root...'
+            sudo mkdir -p /var/www/html
+            if [ -d ~/temp_deploy/html ]; then
+              sudo cp -r ~/temp_deploy/html/* /var/www/html/
+            fi
             
-            # Copy files from temp directory to /var/www
-            sudo cp -r ~/temp_deploy/* /var/www/
+            # Also copy any public directory content to html if it exists
+            if [ -d ~/temp_deploy/public ]; then
+              sudo cp -r ~/temp_deploy/public/* /var/www/html/
+            fi
             
-            # Set ownership to current user and web server group
+            # Set proper permissions for html directory
+            sudo chown -R $EC2_USER /var/www/html
+            sudo chgrp -R \$WEB_USER /var/www/html
+            sudo chmod -R 755 /var/www/html
+            sudo find /var/www/html -type f -exec chmod 644 {} \;
+            
+            # Deploy rest of application code to /var/www
+            echo 'Deploying application code to /var/www...'
+            for item in ~/temp_deploy/*; do
+              if [[ \"\$item\" != *\"/html\"* && \"\$item\" != *\"/public\"* ]]; then
+                sudo cp -r \$item /var/www/
+              fi
+            done
+            
+            # Set proper permissions for application code
             sudo chown -R $EC2_USER /var/www
             sudo chgrp -R \$WEB_USER /var/www
-            
-            # Set directory permissions
-            sudo find /var/www -type d -exec chmod 750 {} \;
-            sudo find /var/www/public -type d -exec chmod 755 {} \;
-            
-            # Set file permissions
-            sudo find /var/www -type f -exec chmod 640 {} \;
-            sudo find /var/www/public -type f -exec chmod 644 {} \;
+            sudo find /var/www -path /var/www/html -prune -o -type d -exec chmod 750 {} \;
+            sudo find /var/www -path /var/www/html -prune -o -type f -exec chmod 640 {} \;
             
             # Make scripts executable
             sudo find /var/www -name '*.sh' -exec chmod 750 {} \;
@@ -89,7 +103,9 @@ jobs:
             rm -rf ~/temp_deploy
             
             # Verify deployment
-            echo 'Deployment files:'
+            echo 'Deployment files in /var/www/html (web root):'
+            ls -la /var/www/html/
+            echo 'Deployment files in /var/www (application code):'
             ls -la /var/www/
           "
           
