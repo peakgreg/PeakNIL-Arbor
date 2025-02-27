@@ -1,6 +1,15 @@
 <?php
 // Define root path using dirname to get parent directory of config
-define('ROOT_PATH', dirname(__DIR__));  // This goes up one level from config/
+// define('ROOT_PATH', dirname(__DIR__));  // This goes up one level from config/
+
+// Check if we're in the split directory structure (production)
+if (file_exists('/var/www/public') && realpath(__DIR__) === '/var/www/config') {
+    define('ROOT_PATH', '/var/www');  // Absolute path in production
+    define('PUBLIC_PATH', '/var/www/public');
+} else {
+    define('ROOT_PATH', dirname(__DIR__));  // Relative path in development
+    define('PUBLIC_PATH', ROOT_PATH . '/public');
+}
 
 // Define other paths relative to ROOT_PATH
 define('CONFIG_PATH', ROOT_PATH . '/config');
