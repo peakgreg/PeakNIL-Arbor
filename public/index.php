@@ -1,7 +1,5 @@
 <?php
 
-echo "test";
-
 error_log('Starting html/index.php');
 
 // Load initialization
