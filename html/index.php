@@ -1,5 +1,5 @@
 <?php
-error_log('Starting public/index.php');
+error_log('Starting html/index.php');
 
 // Load initialization
 require_once __DIR__ . '/../config/init.php';

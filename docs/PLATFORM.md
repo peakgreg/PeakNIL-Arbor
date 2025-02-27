@@ -156,7 +156,7 @@
 
 ### File Structure
 - Modular architecture
-- Separate public/private areas
+- Separate html/private areas
 - Asset management
 - Cache management
 - Storage organization

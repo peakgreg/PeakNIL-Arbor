@@ -76,9 +76,9 @@ done
 
 # Create CSS and JS files (placeholders)
 echo "Creating asset files..."
-mkdir -p public/assets/modules/${MODULE_NAME}
-touch public/assets/modules/${MODULE_NAME}/style.css
-touch public/assets/modules/${MODULE_NAME}/main.js
+mkdir -p html/assets/modules/${MODULE_NAME}
+touch html/assets/modules/${MODULE_NAME}/style.css
+touch html/assets/modules/${MODULE_NAME}/main.js
 
 # Update router configuration
 echo "Updating router configuration..."

@@ -91,7 +91,7 @@ modules/[module_name]/
 Module assets must be organized in the public directory:
 
 ```
-public/assets/modules/[module_name]/
+html/assets/modules/[module_name]/
 ├── css/
 │   └── [module_name].css
 └── js/
@@ -102,7 +102,7 @@ public/assets/modules/[module_name]/
 
 To add a new module to the platform, if it is public.
 
-1. Open `public/index.php`
+1. Open `html/index.php`
 
 2. Add a new case to the main routing switch statement. Do not remove anything, just amend the file:
     ```php
