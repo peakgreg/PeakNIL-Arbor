@@ -99,6 +99,11 @@ switch ($module) {
         require_once MODULES_PATH . '/dashboard/dashboard.php';
         break;
 
+    case 'deals':
+        require_auth();
+        require_once MODULES_PATH . '/deals/deals.php';
+        break;
+
     case 'settings':
         require_auth();
         require_once MODULES_PATH . '/settings/settings.php';
@@ -107,6 +112,140 @@ switch ($module) {
         require_auth();
         require_once MODULES_PATH . '/wallet/wallet.php';
         break;
+
+    // EXPERIMENTAL
+    case 'workbench':
+        require_auth();
+        // Check for workbench access permission
+        if (!isset($_SESSION['workbench_access']) || $_SESSION['workbench_access'] !== 1) {
+            // Redirect to dashboard if user doesn't have workbench access
+            header('Location: /dashboard');
+            exit;
+        }
+        require_once MODULES_PATH . '/workbench/workbench.php';
+        break;
+
+    case 'school-manager':
+        require_auth();
+        // Check for workbench access permission
+        if (!isset($_SESSION['experimental_access']) || $_SESSION['experimental_access'] !== 1) {
+            // Redirect to dashboard if user doesn't have workbench access
+            header('Location: /dashboard');
+            exit;
+        }
+        require_once MODULES_PATH . '/school-manager/school-manager.php';
+        break;
+
+    case 'parents':
+        require_auth();
+        // Check for workbench access permission
+        if (!isset($_SESSION['experimental_access']) || $_SESSION['experimental_access'] !== 1) {
+            // Redirect to dashboard if user doesn't have workbench access
+            header('Location: /dashboard');
+            exit;
+        }
+        require_once MODULES_PATH . '/parent-portal/parent-portal.php';
+        break;
+
+    case 'data-services':
+        require_auth();
+        // Check for workbench access permission
+        if (!isset($_SESSION['experimental_access']) || $_SESSION['experimental_access'] !== 1) {
+            // Redirect to dashboard if user doesn't have workbench access
+            header('Location: /dashboard');
+            exit;
+        }
+        require_once MODULES_PATH . '/data-services/data-services.php';
+        break;
+
+    case 'collectives':
+        require_auth();
+        // Check for workbench access permission
+        if (!isset($_SESSION['experimental_access']) || $_SESSION['experimental_access'] !== 1) {
+            // Redirect to dashboard if user doesn't have workbench access
+            header('Location: /dashboard');
+            exit;
+        }
+        require_once MODULES_PATH . '/collectives/collectives.php';
+        break;
+
+    case 'deal-builder':
+        require_auth();
+        // Check for workbench access permission
+        if (!isset($_SESSION['experimental_access']) || $_SESSION['experimental_access'] !== 1) {
+            // Redirect to dashboard if user doesn't have workbench access
+            header('Location: /dashboard');
+            exit;
+        }
+        require_once MODULES_PATH . '/deal-builder/deal-builder.php';
+        break;
+
+    case 'campaign-builder':
+        require_auth();
+        // Check for workbench access permission
+        if (!isset($_SESSION['experimental_access']) || $_SESSION['experimental_access'] !== 1) {
+            // Redirect to dashboard if user doesn't have workbench access
+            header('Location: /dashboard');
+            exit;
+        }
+        require_once MODULES_PATH . '/campaign-builder/campaign-builder.php';
+        break;
+
+    case 'recruiting':
+        require_auth();
+        // Check for workbench access permission
+        if (!isset($_SESSION['experimental_access']) || $_SESSION['experimental_access'] !== 1) {
+            // Redirect to dashboard if user doesn't have workbench access
+            header('Location: /dashboard');
+            exit;
+        }
+        require_once MODULES_PATH . '/recruiting/recruiting.php';
+        break;
+
+    case 'agency':
+        require_auth();
+        // Check for workbench access permission
+        if (!isset($_SESSION['experimental_access']) || $_SESSION['experimental_access'] !== 1) {
+            // Redirect to dashboard if user doesn't have workbench access
+            header('Location: /dashboard');
+            exit;
+        }
+        require_once MODULES_PATH . '/agency/agency.php';
+        break;
+
+    case 'financial-literacy':
+        require_auth();
+        // Check for workbench access permission
+        if (!isset($_SESSION['experimental_access']) || $_SESSION['experimental_access'] !== 1) {
+            // Redirect to dashboard if user doesn't have workbench access
+            header('Location: /dashboard');
+            exit;
+        }
+        require_once MODULES_PATH . '/financial-literacy/financial-literacy.php';
+        break;
+
+    case 'messenger':
+        require_auth();
+        // Check for workbench access permission
+        if (!isset($_SESSION['experimental_access']) || $_SESSION['experimental_access'] !== 1) {
+            // Redirect to dashboard if user doesn't have workbench access
+            header('Location: /dashboard');
+            exit;
+        }
+        require_once MODULES_PATH . '/messenger/messenger.php';
+        break;
+
+    case 'favorites':
+        require_auth();
+        // Check for workbench access permission
+        if (!isset($_SESSION['experimental_access']) || $_SESSION['experimental_access'] !== 1) {
+            // Redirect to dashboard if user doesn't have workbench access
+            header('Location: /dashboard');
+            exit;
+        }
+        require_once MODULES_PATH . '/favorites/favorites.php';
+        break;
+
 
     // Error handling
     default:

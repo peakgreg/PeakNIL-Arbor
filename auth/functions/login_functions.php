@@ -127,6 +127,8 @@ function log_activity($user_id, $activity) {
  * @return void
  */
 function create_user_session($user) {
+    global $db;
+    
     // Regenerate session ID to prevent session fixation
     regenerate_session();
     
@@ -136,6 +138,15 @@ function create_user_session($user) {
     $_SESSION['username'] = $user['username'];
     $_SESSION['email'] = $user['email'];
     $_SESSION['logged_in'] = true;
+    
+    // Fetch workbench_access flag from user_flags table
+    $stmt = $db->prepare("SELECT workbench_access, experimental_access FROM user_flags WHERE uuid = ?");
+    $stmt->bind_param('s', $user['uuid']);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $row = $result->fetch_assoc();
+    $_SESSION['workbench_access'] = $row['workbench_access'];
+    $_SESSION['experimental_access'] = $row['experimental_access'];
     
     // Log login activity
     log_activity($user['id'], 'log_in');

@@ -1,0 +1,8 @@
+/* variable */
+:root {
+  --base-color: rgba(4,203,255,1);
+  --medium-gray: #6F7071;
+  --dark-gray: #1C1D1F;
+  --alt-font: 'Inter', sans-serif;
+  --primary-font: 'Inter', sans-serif;
+}
