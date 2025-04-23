@@ -29,7 +29,7 @@
                     <!-- start footer column -->
                     <div class="col-xl-3 col-lg-4 col-md-5 col-sm-6 md-mb-30px">
                         <a href="demo-logistics.html" class="footer-logo mb-20px d-inline-block"> 
-                            <img src="images/demo-logistics-logo-white.png" data-at2x="images/demo-logistics-logo-white.png" alt="">
+                            <img src="logo-1x-white.png" data-at2x="logo-1x-white.png" alt="">
                         </a>
                         <p class="fs-17 mx-auto xs-w-90">Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet ipsum.</p> 
                         <div class="row align-items-center border border-color-transparent-white-light g-0 border-radius-4px">

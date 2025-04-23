@@ -46,6 +46,10 @@ switch ($module) {
         require_once MODULES_PATH . '/landing/views/view.about.php';
         break;
 
+    case 'test':
+        require_once MODULES_PATH . '/test/test.php';
+        break;
+
     case 'contact':
         require_once MODULES_PATH . '/landing/views/view.contact.php';
         break;

@@ -12,9 +12,9 @@
                 <div class="container-fluid">
                     <div class="col-auto col-lg-2 me-lg-0 me-auto">
                         <a class="navbar-brand" href="demo-web-agency.html">
-                            <img src="logo-1x.png" data-at2x="logo-2x.png" alt="" class="default-logo">
-                            <img src="logo-1x.png" data-at2x="logo-2x.png" alt="" class="alt-logo">
-                            <img src="logo-1x.png" data-at2x="logo-2x.png" alt="" class="mobile-logo"> 
+                            <img src="logo-black-white-1x.png" data-at2x="logo-black-white-2x.png" alt="" class="default-logo">
+                            <img src="logo-black-white-1x.png" data-at2x="logo-black-white-2x.png" alt="" class="alt-logo">
+                            <img src="logo-black-white-1x.png" data-at2x="logo-black-white-2x.png" alt="" class="mobile-logo"> 
                         </a>
                     </div>
                     <div class="col-auto col-lg-8 menu-order position-static">
