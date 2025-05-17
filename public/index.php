@@ -118,6 +118,7 @@ switch ($module) {
         break;
 
     // EXPERIMENTAL
+
     case 'workbench':
         require_auth();
         // Check for workbench access permission

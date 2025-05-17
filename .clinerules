@@ -1,6 +1,12 @@
 # General Information
 
   - We are testing at http://localhost:8888
+  - Review docs/DOCUMENTATION_INDEX.md for documentation help.
+
+# Database
+  - No FOREIGN KEY constraints allowed. Assume PlanetScale as the database, and that referential integrity must be managed in application code. Enforce relationships and data integrity through the application logic only.
+  - When adding a new database or updating an existing one, update the schema
+  database/complete_schema.sql and add the individual schema to database/schema.
 
 # Memory and Confidence Checks
 
@@ -41,6 +47,6 @@
 
 ## Sensitive Files
 
-DO NOT read or modify:
+DO NOT modify:
 
 -   .env files

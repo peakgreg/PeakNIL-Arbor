@@ -1,4 +1,10 @@
 <?php
+/**
+ * Database connection configuration
+ * 
+ * Modified to conditionally enable SSL only for non-local connections
+ * Local connections (localhost/127.0.0.1) will not use SSL
+ */
 
 // Database configuration - environment variables are now loaded in init.php
 $dbConfig = [
@@ -12,9 +18,24 @@ $dbConfig = [
 
 // Initialize global mysqli connection
 try {
-    // Create connection with SSL enabled and store in both $db and $conn
+    // Create connection and store in both $db and $conn
     $db = $conn = mysqli_init();
-    $db->ssl_set(NULL, NULL, NULL, NULL, NULL);
+    
+    // Check if we're connecting to a local database
+    $isLocalConnection = in_array(strtolower($dbConfig['host']), ['localhost', '127.0.0.1']);
+    
+    // Only set SSL for non-local connections
+    if (!$isLocalConnection) {
+        $db->ssl_set(NULL, NULL, NULL, NULL, NULL);
+    }
+    
+    // Determine connection flags based on host
+    $flags = 0; // Use 0 instead of NULL to avoid deprecation warning
+    if (!$isLocalConnection) {
+        // Enable SSL for remote connections
+        $flags = MYSQLI_CLIENT_SSL | MYSQLI_CLIENT_SSL_DONT_VERIFY_SERVER_CERT;
+    }
+    
     $db->real_connect(
         $dbConfig['host'],
         $dbConfig['user'],
@@ -22,7 +43,7 @@ try {
         $dbConfig['name'],
         $dbConfig['port'], // Use port from config
         NULL, // No socket - force TCP connection
-        MYSQLI_CLIENT_SSL | MYSQLI_CLIENT_SSL_DONT_VERIFY_SERVER_CERT // Enable SSL without strict cert verification
+        $flags
     );
     
     if ($db->connect_error) {

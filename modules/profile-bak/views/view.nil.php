@@ -329,20 +329,42 @@
   <!-- Service Cards Column -->
   <div class="col p-0">
     <div class="row g-3" id="servicesContainer">
-      <?php foreach ($services as $service): ?>
+      <?php 
+      // Check if services array exists and is not empty
+      if (!empty($services) && is_array($services)):
+        foreach ($services as $service): 
+          // Ensure all required service properties exist
+          $serviceCategory = isset($service['service_category']) ? $service['service_category'] : '';
+          $serviceTags = isset($service['service_tags']) ? $service['service_tags'] : '';
+          $servicePrice = isset($service['service_price']) ? $service['service_price'] : 0;
+          $serviceName = isset($service['service_name']) ? $service['service_name'] : '';
+          $serviceImageThumbnail = isset($service['service_image_thumbnail']) ? $service['service_image_thumbnail'] : '';
+      ?>
       <div class="col-xxl-3 col-xl-3 col-lg-4 col-md-6 col-sm-4 col-6 mb-4 service-card" 
-           data-category="<?= strtolower($service['service_tags'] . ' ' . $service['service_category']) ?>" 
-           data-price="<?= removeLastTwoDigits($service['service_price']) ?>">
+           data-category="<?= strtolower($serviceTags . ' ' . $serviceCategory) ?>" 
+           data-price="<?= removeLastTwoDigits($servicePrice) ?>">
         <a href="service1-details.html" class="card">
-          <img src="<?= $service['service_image_thumbnail'] ?>" class="card-img-top p-1" alt="<?= $service['service_name'] ?>">
+          <img src="<?= $serviceImageThumbnail ?>" class="card-img-top p-1" alt="<?= $serviceName ?>">
           <div class="card-body p-2">
-            <div class="service-category"><?= ucfirst($service['service_category']) ?></div>
-            <h6 class="card-title mb-1"><?= $service['service_name'] ?></h6>
-            <p class="card-text mb-0">$<?= formatPrice($service['service_price']) ?></p>
+            <div class="service-category"><?= ucfirst($serviceCategory) ?></div>
+            <h6 class="card-title mb-1"><?= $serviceName ?></h6>
+            <p class="card-text mb-0">$<?= formatPrice($servicePrice) ?></p>
           </div>
         </a>
       </div>
-      <?php endforeach; ?>
+      <?php 
+        endforeach;
+      else:
+        // Display a message if no services are available
+        echo '<div class="col-12 text-center py-5">
+                <div style="color: #6c757d;">
+                    <i class="bi bi-shop" style="font-size: 3rem;"></i>
+                    <h5 class="mt-3">No services available</h5>
+                    <p>This profile doesn\'t have any services listed yet.</p>
+                </div>
+              </div>';
+      endif;
+      ?>
     </div>
   </div>
 </div>

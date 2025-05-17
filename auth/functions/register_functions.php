@@ -218,7 +218,7 @@ function email_exists($email) {
 }
 
 /**
- * Creates a new user account
+ * Creates a new user account with associated records in related tables
  * 
  * @param string $username
  * @param string $email
@@ -238,28 +238,30 @@ function create_user($username, $email, $password) {
         $hashed_password = hash_password($password);
         $created_at = date('Y-m-d H:i:s');
         $verification_code = generate_verification_code();
-        
-        $stmt = $db->prepare("
-            INSERT INTO users (
-                uuid, username, email, password_hash, created_at, 
-                email_verified, email_confirmation_code
-            ) VALUES (
-                ?, ?, ?, ?, ?, 
-                0, ?
-            )
-        ");
-        
-        if (!$stmt) {
-            error_log("Prepare statement failed: " . $db->error);
-            return ['error' => 'Database prepare statement failed'];
-        }
+        $timestamp = time();
+        $ip_address = $_SERVER['REMOTE_ADDR'] ?? null;
+        $user_agent = $_SERVER['HTTP_USER_AGENT'] ?? null;
         
         // Use mysqli transaction methods
         $db->begin_transaction();
         
         try {
-            // Insert the user
-            $stmt->bind_param('ssssss', 
+            // 1. Insert into users table
+            $stmt_users = $db->prepare("
+                INSERT INTO users (
+                    uuid, username, email, password_hash, created_at, 
+                    email_verified, email_confirmation_code
+                ) VALUES (
+                    ?, ?, ?, ?, ?, 
+                    0, ?
+                )
+            ");
+            
+            if (!$stmt_users) {
+                throw new Exception("Prepare statement failed for users table: " . $db->error);
+            }
+            
+            $stmt_users->bind_param('ssssss', 
                 $uuid, 
                 $username, 
                 $email, 
@@ -268,11 +270,82 @@ function create_user($username, $email, $password) {
                 $verification_code
             );
             
-            if (!$stmt->execute()) {
-                throw new Exception("Failed to insert user: " . $stmt->error);
+            if (!$stmt_users->execute()) {
+                throw new Exception("Failed to insert user: " . $stmt_users->error);
             }
             
             $user_id = $db->insert_id;
+            $stmt_users->close();
+            
+            // 2. Insert into user_flags table
+            $stmt_flags = $db->prepare("
+                INSERT INTO user_flags (
+                    uuid, verified, imported, dynamic_pricing, 
+                    deactivated, banned, workbench_access, debug_access
+                ) VALUES (
+                    ?, 0, 0, 0, 
+                    0, 0, 0, 0
+                )
+            ");
+            
+            if (!$stmt_flags) {
+                throw new Exception("Prepare statement failed for user_flags table: " . $db->error);
+            }
+            
+            $stmt_flags->bind_param('s', $uuid);
+            
+            if (!$stmt_flags->execute()) {
+                throw new Exception("Failed to insert user_flags: " . $stmt_flags->error);
+            }
+            $stmt_flags->close();
+            
+            // 3. Insert into user_metadata table
+            $stmt_metadata = $db->prepare("
+                INSERT INTO user_metadata (
+                    uuid, ip_address, user_agent, signup_timestamp, 
+                    accepted_terms_at, tos_version
+                ) VALUES (
+                    ?, ?, ?, ?, 
+                    ?, 1
+                )
+            ");
+            
+            if (!$stmt_metadata) {
+                throw new Exception("Prepare statement failed for user_metadata table: " . $db->error);
+            }
+            
+            $stmt_metadata->bind_param('sssii', 
+                $uuid, 
+                $ip_address, 
+                $user_agent, 
+                $timestamp, 
+                $timestamp
+            );
+            
+            if (!$stmt_metadata->execute()) {
+                throw new Exception("Failed to insert user_metadata: " . $stmt_metadata->error);
+            }
+            $stmt_metadata->close();
+            
+            // 4. Insert into user_profiles table
+            $stmt_profiles = $db->prepare("
+                INSERT INTO user_profiles (
+                    uuid, access_level, role_id
+                ) VALUES (
+                    ?, 1, 1
+                )
+            ");
+            
+            if (!$stmt_profiles) {
+                throw new Exception("Prepare statement failed for user_profiles table: " . $db->error);
+            }
+            
+            $stmt_profiles->bind_param('s', $uuid);
+            
+            if (!$stmt_profiles->execute()) {
+                throw new Exception("Failed to insert user_profiles: " . $stmt_profiles->error);
+            }
+            $stmt_profiles->close();
             
             // Log the verification code for debugging
             error_log("Generated verification code for $email: $verification_code");
@@ -294,8 +367,6 @@ function create_user($username, $email, $password) {
             $db->rollback();
             error_log("User creation error: " . $e->getMessage());
             return ['error' => $e->getMessage()];
-        } finally {
-            $stmt->close();
         }
     } catch (Exception $e) {
         error_log("Password hashing error: " . $e->getMessage());

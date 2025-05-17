@@ -148,18 +148,19 @@ function send_template_email($to, $subject, $title, $body, $from_name = '') {
 
 /**
  * Get mail configuration from environment variables
+ * Checks both $_ENV array and getenv() function
  * 
  * @return array Mail configuration settings
  */
 function get_mail_config() {
     return [
-        'host' => getenv('MAIL_HOST'),
-        'port' => getenv('MAIL_PORT'),
-        'username' => getenv('MAIL_USERNAME'),
-        'password' => getenv('MAIL_PASSWORD'),
-        'encryption' => getenv('MAIL_ENCRYPTION'),
-        'from_address' => getenv('MAIL_FROM_ADDRESS'),
-        'from_name' => getenv('MAIL_FROM_NAME')
+        'host' => $_ENV['MAIL_HOST'] ?? getenv('MAIL_HOST') ?? '',
+        'port' => $_ENV['MAIL_PORT'] ?? getenv('MAIL_PORT') ?? '',
+        'username' => $_ENV['MAIL_USERNAME'] ?? getenv('MAIL_USERNAME') ?? '',
+        'password' => $_ENV['MAIL_PASSWORD'] ?? getenv('MAIL_PASSWORD') ?? '',
+        'encryption' => $_ENV['MAIL_ENCRYPTION'] ?? getenv('MAIL_ENCRYPTION') ?? '',
+        'from_address' => $_ENV['MAIL_FROM_ADDRESS'] ?? getenv('MAIL_FROM_ADDRESS') ?? '',
+        'from_name' => $_ENV['MAIL_FROM_NAME'] ?? getenv('MAIL_FROM_NAME') ?? ''
     ];
 }
 
