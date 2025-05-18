@@ -9,7 +9,7 @@ PeakNIL Platform - Codename Arbor
 
 # Terminal Commands
   - Generate directory tree
-    `tree -a --prune -I 'vendor' > directory_tree.txt`
+    `tree -a --prune -I 'vendor|.git' > directory_tree.txt`
 
 # Architecture 
   - Procedural Modular Architecture
