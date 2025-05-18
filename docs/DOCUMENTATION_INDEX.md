@@ -13,18 +13,6 @@ This document serves as a central reference point for all PeakNIL platform docum
 | [API System](API_SYSTEM.md) | Documentation of the API system, including endpoints, authentication, and usage examples |
 | [Server Configuration](SERVER.md) | Guide for setting up and configuring the server environment |
 
-## Additional Documentation
-
-| Document | Description |
-|----------|-------------|
-| [README](README.md) | Basic setup instructions and terminal commands |
-| [CHANGELOG](CHANGELOG.md) | History of changes to the platform |
-| [TODO](TODO.md) | Planned improvements and features |
-| [MODULES](MODULES.md) | Guide for creating new modules |
-| [API](API.md) | API documentation and usage examples |
-| [SECURITY](SECURITY.md) | Security analysis and checklist |
-| [TERMINAL_COMMANDS](TERMINAL_COMMANDS.md) | Common terminal commands for managing the platform |
-
 ## Module-Specific Documentation
 
 The platform includes various modules, each with its own functionality:

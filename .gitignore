@@ -7,3 +7,4 @@ PeakNIL-Arbor.pem
 # Ignore these directories
 vendor
 public/tools/
+public/workbench/

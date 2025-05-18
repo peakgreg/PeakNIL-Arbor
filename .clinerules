@@ -1,9 +1,9 @@
 # General Information
-
   - We are testing at http://localhost:8888
   - Review docs/DOCUMENTATION_INDEX.md for documentation help.
 
 # Database
+
   - No FOREIGN KEY constraints allowed. Assume PlanetScale as the database, and that referential integrity must be managed in application code. Enforce relationships and data integrity through the application logic only.
   - When adding a new database or updating an existing one, update the schema
   database/complete_schema.sql and add the individual schema to database/schema.
@@ -30,8 +30,7 @@
   - Before writing code:
     1. Analyze all code files thoroughly.
     2. Get full context.
-    3. Write .MD implementation plan.
-    4. Then implement code.
+    3. Then implement code.
 
   - Start analyzing full flow thoroughly, always state a confidence score 1 to 10.
   - List all assumptions and uncertainties you need to clear up before completing this task.

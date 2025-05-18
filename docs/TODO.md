@@ -6,12 +6,12 @@
 - Build AI Agent (https://youraiagent.com)
 - SEO Heist (https://www.youtube.com/watch?v=-mUEGoA77rk)
 - Contact Stanley Black (https://en.wikipedia.org/wiki/Stanley_Black_(businessman))
+- Matching system.
 
 ## Security Enhancements
 
 ### 1. Two-Factor Authentication (2FA)
 - Implement TOTP-based 2FA
-- Add backup codes
 - Provide recovery options
 - Add 2FA settings in user profile
 
