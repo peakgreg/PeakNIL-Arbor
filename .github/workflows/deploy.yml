@@ -94,11 +94,11 @@ jobs:
           
           # Copy public directory contents to /var/www/public
           echo "Uploading /public contents to /var/www/public..."
-          rsync -av --exclude='.git*' --exclude='private_key.pem' -e "ssh -i private_key.pem" ./public/ $EC2_USER@$EC2_HOST:/var/www/public/
-          
+          rsync -av --delete --exclude='.git*' --exclude='private_key.pem' -e "ssh -i private_key.pem" ./public/ $EC2_USER@$EC2_HOST:/var/www/public/
+
           # Copy everything else (excluding public directory) to /var/www
           echo "Uploading non-public files to /var/www..."
-          rsync -av \
+          rsync -av --delete \
             --exclude='.env' \
             --exclude='.git*' \
             --exclude='.gitattributes' \
