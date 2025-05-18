@@ -2,6 +2,7 @@
 .env
 .env.example
 .DS_Store
+PeakNIL-Arbor.pem
 
 # Ignore these directories
 vendor
