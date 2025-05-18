@@ -1,0 +1,8 @@
+# Ignore these files
+.env
+.env.example
+.DS_Store
+
+# Ignore these directories
+vendor
+public/tools/
