@@ -1,7 +1,4 @@
-Auth Boilerplate Platform
-
-  - Run DeepSeek locally:
-    ollama run deepseek-r1:8b
+PeakNIL Platform - Codename Arbor
     
   - composer install --no-dev --optimize-autoloader
 
